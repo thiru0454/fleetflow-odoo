@@ -174,5 +174,3 @@ src/
 This project is for educational and hackathon purposes.
 
 ---
-
-> **FleetFlow** — Built with ❤️ for smarter fleet operations.
