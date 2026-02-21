@@ -118,6 +118,8 @@ const sampleVehicles: Vehicle[] = [
     { id: 'v10', licensePlate: 'BCD-9900', model: 'Volkswagen Crafter', type: 'Van', capacity: 5000, odometer: 88000, status: 'On Trip', region: 'West' },
     { id: 'v11', licensePlate: 'EFG-1133', model: 'Kenworth T680', type: 'Truck', capacity: 27000, odometer: 95000, status: 'On Trip', region: 'East' },
     { id: 'v12', licensePlate: 'HIJ-2244', model: 'Ducati Scrambler', type: 'Bike', capacity: 180, odometer: 2500, status: 'Available', region: 'South' },
+    { id: 'v13', licensePlate: 'KLM-3344', model: 'ISUZU GIGA', type: 'Truck', capacity: 15000, odometer: 45000, status: 'Available', region: 'North' },
+    { id: 'v14', licensePlate: 'NOP-4455', model: 'Toyota TownAce', type: 'Van', capacity: 1000, odometer: 12000, status: 'Available', region: 'East' },
 ];
 
 const sampleDrivers: Driver[] = [
@@ -125,6 +127,8 @@ const sampleDrivers: Driver[] = [
     { id: 'd2', name: 'Sarah Chen', licenseNumber: 'CDL-77312', licenseExpiry: '2026-03-22', completionRate: 98, safetyScore: 97, complaints: 0, status: 'On Duty' },
     { id: 'd3', name: 'James Rivera', licenseNumber: 'CDL-66203', licenseExpiry: '2024-11-30', completionRate: 88, safetyScore: 78, complaints: 3, status: 'Off Duty' },
     { id: 'd4', name: 'Aisha Patel', licenseNumber: 'CDL-55194', licenseExpiry: '2026-07-10', completionRate: 94, safetyScore: 90, complaints: 0, status: 'On Duty' },
+    { id: 'd5', name: 'Elena Rodriguez', licenseNumber: 'CDL-44085', licenseExpiry: '2026-12-05', completionRate: 92, safetyScore: 88, complaints: 0, status: 'On Duty' },
+    { id: 'd6', name: 'David Kim', licenseNumber: 'CDL-33976', licenseExpiry: '2025-05-20', completionRate: 99, safetyScore: 95, complaints: 0, status: 'On Duty' },
 ];
 
 const sampleTrips: Trip[] = [

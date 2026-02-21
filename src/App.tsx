@@ -10,12 +10,12 @@ import { RoleSelectionModal } from "@/components/RoleSelectionModal";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardEnhancedPage";
-import VehiclesPage from "./pages/VehiclesPage";
-import TripsPage from "./pages/TripsPage";
-import MaintenancePage from "./pages/MaintenancePage";
+import VehiclesPage from "./pages/VehiclesEnhancedPage";
+import TripsPage from "./pages/TripsEnhancedPage";
+import MaintenancePage from "./pages/MaintenanceEnhancedPage";
+import AnalyticsPage from "./pages/AnalyticsEnhancedPage";
+import DriversPage from "./pages/DriversEnhancedPage";
 import ExpensesPage from "./pages/ExpensesPage";
-import DriversPage from "./pages/DriversPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
