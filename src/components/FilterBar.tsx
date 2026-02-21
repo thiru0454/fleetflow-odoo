@@ -33,8 +33,8 @@ export function FilterBar({ searchValue, onSearch, searchPlaceholder = 'Search..
             <SelectValue placeholder={f.label} />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border">
-            <SelectItem value="all">All {f.label}</SelectItem>
-            {f.options.map((o) => (
+            <SelectItem value="all">ALL {f.label.toUpperCase()}</SelectItem>
+            {f.options.filter((o) => o.value !== 'all').map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}
           </SelectContent>
