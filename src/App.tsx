@@ -15,6 +15,11 @@ import TripsPage from "./pages/TripsEnhancedPage";
 import MaintenancePage from "./pages/MaintenanceEnhancedPage";
 import AnalyticsPage from "./pages/AnalyticsEnhancedPage";
 import DriversPage from "./pages/DriversEnhancedPage";
+import SafetyPage from "./pages/SafetyCompliancePage";
+import SafetyDashboard from "./pages/SafetyDashboardPage";
+import SafetyIncidents from "./pages/SafetyIncidentsPage";
+import SafetyInspections from "./pages/SafetyInspectionsPage";
+import SafetyReports from "./pages/SafetyReportsPage";
 import ExpensesPage from "./pages/ExpensesPage";
 import NotFound from "./pages/NotFound";
 
@@ -85,6 +90,11 @@ const App = () => (
             <Route path="/maintenance" element={<ProtectedRoute><MaintenancePage /></ProtectedRoute>} />
             <Route path="/expenses" element={<ProtectedRoute><ExpensesPage /></ProtectedRoute>} />
             <Route path="/drivers" element={<ProtectedRoute><DriversPage /></ProtectedRoute>} />
+            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
+            <Route path="/safety-dashboard" element={<ProtectedRoute><SafetyDashboard /></ProtectedRoute>} />
+            <Route path="/safety-incidents" element={<ProtectedRoute><SafetyIncidents /></ProtectedRoute>} />
+            <Route path="/safety-inspections" element={<ProtectedRoute><SafetyInspections /></ProtectedRoute>} />
+            <Route path="/safety-reports" element={<ProtectedRoute><SafetyReports /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

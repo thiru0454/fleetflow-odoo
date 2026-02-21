@@ -8,6 +8,8 @@ export type VehicleStatus = 'Available' | 'On Trip' | 'In Shop' | 'Retired';
 export type TripStatus = 'Draft' | 'Dispatched' | 'Completed' | 'Cancelled';
 export type MaintenanceStatus = 'New' | 'In Progress' | 'Completed';
 export type DriverStatus = 'On Duty' | 'Off Duty' | 'Suspended';
+export type IncidentSeverity = 'Low' | 'Medium' | 'High' | 'Critical';
+export type IncidentStatus = 'Open' | 'Investigating' | 'Closed' | 'Escalated';
 
 export interface Vehicle {
     id: string;
@@ -66,6 +68,34 @@ export interface Expense {
     status: string;
 }
 
+export interface SafetyIncident {
+    id: string;
+    date: string;
+    vehicleId: string;
+    driverId: string;
+    type: string;
+    severity: IncidentSeverity;
+    status: IncidentStatus;
+    description: string;
+    location: string;
+}
+
+export interface SafetyInspection {
+    id: string;
+    date: string;
+    vehicleId: string;
+    inspectorId: string;
+    status: 'Pass' | 'Fail' | 'Advisory';
+    checks: {
+        brakes: boolean;
+        tires: boolean;
+        lights: boolean;
+        fluids: boolean;
+        steering: boolean;
+    };
+    notes: string;
+}
+
 interface AuthState {
     isAuthenticated: boolean;
     user: { name: string; email: string; role: UserRole } | null;
@@ -90,6 +120,8 @@ interface FleetState {
     trips: Trip[];
     maintenanceLogs: MaintenanceLog[];
     expenses: Expense[];
+    incidents: SafetyIncident[];
+    inspections: SafetyInspection[];
     addVehicle: (v: Omit<Vehicle, 'id'>) => void;
     updateVehicle: (id: string, v: Partial<Vehicle>) => void;
     deleteVehicle: (id: string) => void;
@@ -100,7 +132,11 @@ interface FleetState {
     addExpense: (e: Omit<Expense, 'id'>) => void;
     addDriver: (d: Omit<Driver, 'id'>) => void;
     updateDriver: (id: string, d: Partial<Driver>) => void;
+    updateDriverPerformance: (id: string, updates: { safetyScore?: number; complaints?: number }) => void;
     isLicenseExpired: (date: string) => boolean;
+    addSafetyIncident: (i: Omit<SafetyIncident, 'id'>) => void;
+    updateSafetyIncident: (id: string, i: Partial<SafetyIncident>) => void;
+    addSafetyInspection: (i: Omit<SafetyInspection, 'id'>) => void;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -146,6 +182,24 @@ const sampleMaintenance: MaintenanceLog[] = [
 const sampleExpenses: Expense[] = [
     { id: 'EX-001', tripId: 'TR-002', driverId: 'd2', distance: 385, fuelExpense: 265, fuelLiters: 95, miscExpense: 45, date: '2026-02-18', status: 'Approved' },
     { id: 'EX-002', tripId: 'TR-001', driverId: 'd1', distance: 450, fuelExpense: 420, fuelLiters: 150, miscExpense: 30, date: '2026-02-20', status: 'Pending' },
+];
+
+const sampleIncidents: SafetyIncident[] = [
+    { id: 'INC-001', date: '2026-02-15', vehicleId: 'v2', driverId: 'd1', type: 'Minor Collision', severity: 'Medium', status: 'Closed', description: 'Low-speed contact during parking maneuver.', location: 'Logistics Hub A' },
+    { id: 'INC-002', date: '2026-02-18', vehicleId: 'v4', driverId: 'd3', type: 'Speeding Violation', severity: 'High', status: 'Investigating', description: 'Exceeded highway speed limit by 20km/h.', location: 'I-95 Northbound' },
+];
+
+const sampleInspections: SafetyInspection[] = [
+    {
+        id: 'SI-001', date: '2026-02-19', vehicleId: 'v1', inspectorId: 'admin', status: 'Pass',
+        checks: { brakes: true, tires: true, lights: true, fluids: true, steering: true },
+        notes: 'Routine pre-trip inspection. All systems normal.'
+    },
+    {
+        id: 'SI-002', date: '2026-02-20', vehicleId: 'v2', inspectorId: 'admin', status: 'Advisory',
+        checks: { brakes: true, tires: false, lights: true, fluids: true, steering: true },
+        notes: 'Rear tires showing wear. Recommended replacement within 5000km.'
+    },
 ];
 
 async function fetchUserRole(userId: string): Promise<{ role: UserRole; isNew: boolean }> {
@@ -288,6 +342,8 @@ export const useFleetStoreEnhanced = create<FleetState>((set, get) => ({
     trips: sampleTrips,
     maintenanceLogs: sampleMaintenance,
     expenses: sampleExpenses,
+    incidents: sampleIncidents,
+    inspections: sampleInspections,
     addVehicle: (v) => set((s) => ({ vehicles: [...s.vehicles, { ...v, id: uid() }] })),
     updateVehicle: (id, v) => set((s) => ({ vehicles: s.vehicles.map((x) => x.id === id ? { ...x, ...v } : x) })),
     deleteVehicle: (id) => set((s) => ({ vehicles: s.vehicles.filter((x) => x.id !== id) })),
@@ -340,5 +396,11 @@ export const useFleetStoreEnhanced = create<FleetState>((set, get) => ({
     addExpense: (e) => set((s) => ({ expenses: [...s.expenses, { ...e, id: `EX-${String(s.expenses.length + 1).padStart(3, '0')}` }] })),
     addDriver: (d) => set((s) => ({ drivers: [...s.drivers, { ...d, id: uid() }] })),
     updateDriver: (id, d) => set((s) => ({ drivers: s.drivers.map((x) => x.id === id ? { ...x, ...d } : x) })),
+    updateDriverPerformance: (id, updates) => set((s) => ({
+        drivers: s.drivers.map((d) => d.id === id ? { ...d, ...updates } : d)
+    })),
     isLicenseExpired: (date: string) => new Date(date) < new Date(),
+    addSafetyIncident: (i) => set((s) => ({ incidents: [...s.incidents, { ...i, id: `INC-${String(s.incidents.length + 1).padStart(3, '0')}` }] })),
+    updateSafetyIncident: (id, i) => set((s) => ({ incidents: s.incidents.map((x) => x.id === id ? { ...x, ...i } : x) })),
+    addSafetyInspection: (i) => set((s) => ({ inspections: [...s.inspections, { ...i, id: `SI-${String(s.inspections.length + 1).padStart(3, '0')}` }] })),
 }));
