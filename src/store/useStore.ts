@@ -17,6 +17,7 @@ export interface Vehicle {
   capacity: number;
   odometer: number;
   status: VehicleStatus;
+  acquisitionCost: number;
 }
 
 export interface Driver {
@@ -102,11 +103,11 @@ interface FleetState {
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const sampleVehicles: Vehicle[] = [
-  { id: 'v1', licensePlate: 'ABC-1234', model: 'Volvo FH16', type: 'Heavy Truck', capacity: 25000, odometer: 120450, status: 'Available' },
-  { id: 'v2', licensePlate: 'DEF-5678', model: 'Mercedes Actros', type: 'Heavy Truck', capacity: 22000, odometer: 89200, status: 'On Trip' },
-  { id: 'v3', licensePlate: 'GHI-9012', model: 'Ford Transit', type: 'Van', capacity: 3500, odometer: 45600, status: 'Available' },
-  { id: 'v4', licensePlate: 'JKL-3456', model: 'Scania R500', type: 'Heavy Truck', capacity: 28000, odometer: 200100, status: 'In Shop' },
-  { id: 'v5', licensePlate: 'MNO-7890', model: 'Isuzu NPR', type: 'Medium Truck', capacity: 8000, odometer: 67300, status: 'Available' },
+  { id: 'v1', licensePlate: 'ABC-1234', model: 'Volvo FH16', type: 'Heavy Truck', capacity: 25000, odometer: 120450, status: 'Available', acquisitionCost: 145000 },
+  { id: 'v2', licensePlate: 'DEF-5678', model: 'Mercedes Actros', type: 'Heavy Truck', capacity: 22000, odometer: 89200, status: 'On Trip', acquisitionCost: 138000 },
+  { id: 'v3', licensePlate: 'GHI-9012', model: 'Ford Transit', type: 'Van', capacity: 3500, odometer: 45600, status: 'Available', acquisitionCost: 42000 },
+  { id: 'v4', licensePlate: 'JKL-3456', model: 'Scania R500', type: 'Heavy Truck', capacity: 28000, odometer: 200100, status: 'In Shop', acquisitionCost: 155000 },
+  { id: 'v5', licensePlate: 'MNO-7890', model: 'Isuzu NPR', type: 'Medium Truck', capacity: 8000, odometer: 67300, status: 'Available', acquisitionCost: 58000 },
 ];
 
 const sampleDrivers: Driver[] = [

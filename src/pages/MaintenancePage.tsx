@@ -16,7 +16,7 @@ export default function MaintenancePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const [form, setForm] = useState({ vehicleId: '', issue: '', date: '', cost: 0 });
+  const [form, setForm] = useState({ vehicleId: '', issue: '', date: '', cost: '' as string | number });
 
   const getVehicle = (id: string) => vehicles.find((v) => v.id === id);
 
@@ -25,10 +25,10 @@ export default function MaintenancePage() {
       toast({ title: 'Please fill all required fields', variant: 'destructive' });
       return;
     }
-    addMaintenanceLog({ ...form, status: 'New' });
+    addMaintenanceLog({ ...form, cost: Number(form.cost) || 0, status: 'New' });
     toast({ title: 'Maintenance log created — vehicle moved to In Shop' });
     setModalOpen(false);
-    setForm({ vehicleId: '', issue: '', date: '', cost: 0 });
+    setForm({ vehicleId: '', issue: '', date: '', cost: '' });
   };
 
   const filtered = maintenanceLogs.filter((m) => {
@@ -42,7 +42,7 @@ export default function MaintenancePage() {
           <h2 className="text-2xl font-bold">Maintenance & Service</h2>
           <p className="text-sm text-muted-foreground">Track vehicle maintenance and repairs</p>
         </div>
-        <Button onClick={() => { setForm({ vehicleId: '', issue: '', date: new Date().toISOString().split('T')[0], cost: 0 }); setModalOpen(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={() => { setForm({ vehicleId: '', issue: '', date: new Date().toISOString().split('T')[0], cost: '' }); setModalOpen(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" /> Log Service
         </Button>
       </div>
@@ -98,7 +98,7 @@ export default function MaintenancePage() {
             </div>
             <div>
               <Label>Cost ($)</Label>
-              <Input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+              <Input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
             </div>
           </div>
           <div className="flex gap-3 pt-2">

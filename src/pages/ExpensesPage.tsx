@@ -16,7 +16,15 @@ export default function ExpensesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const [form, setForm] = useState({ tripId: '', driverId: '', fuelCost: 0, fuelLiters: 0, miscExpense: 0, date: '' });
+  const [form, setForm] = useState({
+    tripId: '',
+    driverId: '',
+    fuelCost: '' as string | number,
+    fuelLiters: '' as string | number,
+    miscExpense: '' as string | number,
+    distance: '' as string | number,
+    date: ''
+  });
 
   const getDriver = (id: string) => drivers.find((d) => d.id === id);
 
@@ -30,10 +38,10 @@ export default function ExpensesPage() {
     addExpense({
       tripId: form.tripId,
       driverId: form.driverId,
-      distance: 0,
-      fuelExpense: form.fuelCost,
-      fuelLiters: form.fuelLiters,
-      miscExpense: form.miscExpense,
+      distance: Number(form.distance) || 0,
+      fuelExpense: Number(form.fuelCost) || 0,
+      fuelLiters: Number(form.fuelLiters) || 0,
+      miscExpense: Number(form.miscExpense) || 0,
       date: form.date || new Date().toISOString().split('T')[0],
       status: 'Pending',
     });
@@ -52,7 +60,7 @@ export default function ExpensesPage() {
           <h2 className="text-2xl font-bold">Trip & Expense</h2>
           <p className="text-sm text-muted-foreground">Financial tracking and fuel logging</p>
         </div>
-        <Button onClick={() => { setForm({ tripId: '', driverId: '', fuelCost: 0, fuelLiters: 0, miscExpense: 0, date: new Date().toISOString().split('T')[0] }); setModalOpen(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={() => { setForm({ tripId: '', driverId: '', fuelCost: '', fuelLiters: '', miscExpense: '', distance: '', date: new Date().toISOString().split('T')[0] }); setModalOpen(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" /> Add Expense
         </Button>
       </div>
@@ -91,6 +99,7 @@ export default function ExpensesPage() {
         <div className="space-y-4">
           <div>
             <Label>Trip ID</Label>
+            <span className="text-xs text-muted-foreground ml-2">(Required)</span>
             <Select value={form.tripId} onValueChange={(v) => setForm({ ...form, tripId: v })}>
               <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue placeholder="Select trip" /></SelectTrigger>
               <SelectContent className="bg-popover border-border">
@@ -100,6 +109,7 @@ export default function ExpensesPage() {
           </div>
           <div>
             <Label>Driver</Label>
+            <span className="text-xs text-muted-foreground ml-2">(Required)</span>
             <Select value={form.driverId} onValueChange={(v) => setForm({ ...form, driverId: v })}>
               <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue placeholder="Select driver" /></SelectTrigger>
               <SelectContent className="bg-popover border-border">
@@ -110,22 +120,50 @@ export default function ExpensesPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Fuel Cost ($)</Label>
-              <Input type="number" value={form.fuelCost} onChange={(e) => setForm({ ...form, fuelCost: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+              <Input
+                type="number"
+                value={form.fuelCost}
+                onChange={(e) => setForm({ ...form, fuelCost: e.target.value })}
+                className="mt-1.5 bg-secondary border-border"
+                placeholder="0"
+              />
             </div>
             <div>
               <Label>Fuel Liters</Label>
-              <Input type="number" value={form.fuelLiters} onChange={(e) => setForm({ ...form, fuelLiters: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+              <Input
+                type="number"
+                value={form.fuelLiters}
+                onChange={(e) => setForm({ ...form, fuelLiters: e.target.value })}
+                className="mt-1.5 bg-secondary border-border"
+                placeholder="0"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Misc Expense ($)</Label>
-              <Input type="number" value={form.miscExpense} onChange={(e) => setForm({ ...form, miscExpense: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+              <Input
+                type="number"
+                value={form.miscExpense}
+                onChange={(e) => setForm({ ...form, miscExpense: e.target.value })}
+                className="mt-1.5 bg-secondary border-border"
+                placeholder="0"
+              />
             </div>
             <div>
-              <Label>Date</Label>
-              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="mt-1.5 bg-secondary border-border" />
+              <Label>Distance (km)</Label>
+              <Input
+                type="number"
+                value={form.distance}
+                onChange={(e) => setForm({ ...form, distance: e.target.value })}
+                className="mt-1.5 bg-secondary border-border"
+                placeholder="0"
+              />
             </div>
+          </div>
+          <div>
+            <Label>Date</Label>
+            <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="mt-1.5 bg-secondary border-border" />
           </div>
           <div className="flex gap-3 pt-2">
             <Button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">Log Expense</Button>

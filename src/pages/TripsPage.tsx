@@ -18,7 +18,7 @@ export default function TripsPage() {
   const { toast } = useToast();
 
   const [form, setForm] = useState({
-    vehicleId: '', driverId: '', cargoWeight: 0, origin: '', destination: '', estimatedFuelCost: 0,
+    vehicleId: '', driverId: '', cargoWeight: '' as string | number, origin: '', destination: '', estimatedFuelCost: '' as string | number,
   });
   const [cargoError, setCargoError] = useState('');
 
@@ -26,15 +26,16 @@ export default function TripsPage() {
   const availableDrivers = drivers.filter((d) => d.status === 'On Duty');
 
   const openCreate = () => {
-    setForm({ vehicleId: '', driverId: '', cargoWeight: 0, origin: '', destination: '', estimatedFuelCost: 0 });
+    setForm({ vehicleId: '', driverId: '', cargoWeight: '', origin: '', destination: '', estimatedFuelCost: '' });
     setCargoError('');
     setModalOpen(true);
   };
 
-  const handleCargoChange = (val: number) => {
+  const handleCargoChange = (val: string) => {
     setForm({ ...form, cargoWeight: val });
+    const numVal = Number(val) || 0;
     const vehicle = vehicles.find((v) => v.id === form.vehicleId);
-    if (vehicle && val > vehicle.capacity) {
+    if (vehicle && numVal > vehicle.capacity) {
       setCargoError('Cargo exceeds maximum vehicle capacity');
     } else {
       setCargoError('');
@@ -44,7 +45,7 @@ export default function TripsPage() {
   const handleVehicleChange = (vid: string) => {
     setForm({ ...form, vehicleId: vid });
     const vehicle = vehicles.find((v) => v.id === vid);
-    if (vehicle && form.cargoWeight > vehicle.capacity) {
+    if (vehicle && Number(form.cargoWeight) > vehicle.capacity) {
       setCargoError('Cargo exceeds maximum vehicle capacity');
     } else {
       setCargoError('');
@@ -63,6 +64,8 @@ export default function TripsPage() {
     const vehicle = vehicles.find((v) => v.id === form.vehicleId);
     addTrip({
       ...form,
+      cargoWeight: Number(form.cargoWeight) || 0,
+      estimatedFuelCost: Number(form.estimatedFuelCost) || 0,
       vehicleType: vehicle?.type || '',
       status: 'Draft',
       date: new Date().toISOString().split('T')[0],
@@ -167,7 +170,7 @@ export default function TripsPage() {
           </div>
           <div>
             <Label>Cargo Weight (kg)</Label>
-            <Input type="number" value={form.cargoWeight} onChange={(e) => handleCargoChange(Number(e.target.value))} className="mt-1.5 bg-secondary border-border" />
+            <Input type="number" value={form.cargoWeight} onChange={(e) => handleCargoChange(e.target.value)} className="mt-1.5 bg-secondary border-border" placeholder="0" />
             {cargoError && <p className="text-xs text-destructive mt-1">{cargoError}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -182,7 +185,7 @@ export default function TripsPage() {
           </div>
           <div>
             <Label>Estimated Fuel Cost ($)</Label>
-            <Input type="number" value={form.estimatedFuelCost} onChange={(e) => setForm({ ...form, estimatedFuelCost: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+            <Input type="number" value={form.estimatedFuelCost} onChange={(e) => setForm({ ...form, estimatedFuelCost: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
           </div>
           <div className="flex gap-3 pt-2">
             <Button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">Confirm & Create Trip</Button>
