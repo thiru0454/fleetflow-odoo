@@ -70,8 +70,10 @@ interface AuthState {
   session: Session | null;
   supabaseUser: User | null;
   loading: boolean;
+  needsRoleSelection: boolean;
   setSession: (session: Session | null) => void;
   setRole: (role: UserRole) => void;
+  updateRoleInSupabase: (role: UserRole) => Promise<void>;
   login: (email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
   register: (name: string, email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
   loginWithGoogle: () => Promise<void>;
@@ -130,13 +132,15 @@ const sampleExpenses: Expense[] = [
   { id: 'EX-002', tripId: 'TR-001', driverId: 'd1', distance: 450, fuelExpense: 420, fuelLiters: 150, miscExpense: 30, date: '2026-02-20', status: 'Pending' },
 ];
 
-async function fetchUserRole(userId: string): Promise<UserRole> {
+async function fetchUserRole(userId: string): Promise<{ role: UserRole; isNew: boolean }> {
   const { data } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', userId)
     .single();
-  return (data?.role as UserRole) || 'fleet_manager';
+  // If no role found, user is brand new (trigger may not have fired yet for OAuth)
+  if (!data) return { role: 'fleet_manager', isNew: true };
+  return { role: data.role as UserRole, isNew: false };
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -145,15 +149,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   supabaseUser: null,
   loading: true,
+  needsRoleSelection: false,
 
   setSession: async (session) => {
     if (session?.user) {
-      const role = await fetchUserRole(session.user.id);
+      const { role, isNew } = await fetchUserRole(session.user.id);
       const meta = session.user.user_metadata;
+      const isOAuth = session.user.app_metadata?.provider === 'google';
       set({
         isAuthenticated: true,
         session,
         supabaseUser: session.user,
+        needsRoleSelection: isOAuth && isNew,
         user: {
           name: meta?.name || meta?.full_name || session.user.email?.split('@')[0] || 'User',
           email: session.user.email || '',
@@ -168,6 +175,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         supabaseUser: null,
         user: null,
         loading: false,
+        needsRoleSelection: false,
       });
     }
   },
@@ -175,6 +183,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setRole: (role) => {
     const { user } = get();
     if (user) set({ user: { ...user, role } });
+  },
+
+  updateRoleInSupabase: async (role) => {
+    const { supabaseUser, user } = get();
+    if (!supabaseUser) return;
+    // Update existing role or insert if missing
+    const { data: existing } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', supabaseUser.id)
+      .single();
+    if (existing) {
+      await supabase
+        .from('user_roles')
+        .update({ role })
+        .eq('user_id', supabaseUser.id);
+    } else {
+      await supabase
+        .from('user_roles')
+        .insert({ user_id: supabaseUser.id, role });
+    }
+    if (user) set({ user: { ...user, role }, needsRoleSelection: false });
   },
 
   login: async (email, password, _role) => {
