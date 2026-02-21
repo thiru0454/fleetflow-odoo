@@ -21,18 +21,26 @@ export default function VehiclesPage() {
   const { toast } = useToast();
 
   const [form, setForm] = useState({
-    licensePlate: '', model: '', type: '', capacity: 0, odometer: 0, status: 'Available' as VehicleStatus,
+    licensePlate: '', model: '', type: '', capacity: '' as string | number, odometer: '' as string | number, status: 'Available' as VehicleStatus, acquisitionCost: '' as string | number,
   });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ licensePlate: '', model: '', type: '', capacity: 0, odometer: 0, status: 'Available' });
+    setForm({ licensePlate: '', model: '', type: '', capacity: '', odometer: '', status: 'Available', acquisitionCost: '' });
     setModalOpen(true);
   };
 
   const openEdit = (v: Vehicle) => {
     setEditing(v);
-    setForm({ licensePlate: v.licensePlate, model: v.model, type: v.type, capacity: v.capacity, odometer: v.odometer, status: v.status });
+    setForm({
+      licensePlate: v.licensePlate,
+      model: v.model,
+      type: v.type,
+      capacity: v.capacity,
+      odometer: v.odometer,
+      status: v.status,
+      acquisitionCost: v.acquisitionCost
+    });
     setModalOpen(true);
   };
 
@@ -42,14 +50,24 @@ export default function VehiclesPage() {
       return;
     }
     if (editing) {
-      updateVehicle(editing.id, form);
+      updateVehicle(editing.id, {
+        ...form,
+        capacity: Number(form.capacity) || 0,
+        odometer: Number(form.odometer) || 0,
+        acquisitionCost: Number(form.acquisitionCost) || 0
+      });
       toast({ title: 'Vehicle updated' });
     } else {
       if (vehicles.some((v) => v.licensePlate === form.licensePlate)) {
         toast({ title: 'License plate must be unique', variant: 'destructive' });
         return;
       }
-      addVehicle(form);
+      addVehicle({
+        ...form,
+        capacity: Number(form.capacity) || 0,
+        odometer: Number(form.odometer) || 0,
+        acquisitionCost: Number(form.acquisitionCost) || 0
+      });
       toast({ title: 'Vehicle created' });
     }
     setModalOpen(false);
@@ -145,18 +163,24 @@ export default function VehiclesPage() {
             <Label>Model</Label>
             <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} className="mt-1.5 bg-secondary border-border" />
           </div>
-          <div>
-            <Label>Type</Label>
-            <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Heavy Truck, Van, etc." className="mt-1.5 bg-secondary border-border" />
-          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Max Payload (kg)</Label>
-              <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+              <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
             </div>
             <div>
+              <Label>Type</Label>
+              <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Heavy Truck, Van, etc." className="mt-1.5 bg-secondary border-border" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <Label>Initial Odometer</Label>
-              <Input type="number" value={form.odometer} onChange={(e) => setForm({ ...form, odometer: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+              <Input type="number" value={form.odometer} onChange={(e) => setForm({ ...form, odometer: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
+            </div>
+            <div>
+              <Label>Acquisition Cost ($)</Label>
+              <Input type="number" value={form.acquisitionCost} onChange={(e) => setForm({ ...form, acquisitionCost: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
             </div>
           </div>
           <div>

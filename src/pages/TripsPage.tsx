@@ -20,7 +20,7 @@ export default function TripsPage() {
   const { toast } = useToast();
 
   const [form, setForm] = useState({
-    vehicleId: '', driverId: '', cargoWeight: 0, origin: '', destination: '', estimatedFuelCost: 0,
+    vehicleId: '', driverId: '', cargoWeight: '' as string | number, origin: '', destination: '', estimatedFuelCost: '' as string | number,
   });
   const [cargoError, setCargoError] = useState('');
   const [licenseError, setLicenseError] = useState('');
@@ -29,16 +29,17 @@ export default function TripsPage() {
   const availableDrivers = drivers.filter((d) => d.status === 'On Duty' && !isLicenseExpired(d.licenseExpiry));
 
   const openCreate = () => {
-    setForm({ vehicleId: '', driverId: '', cargoWeight: 0, origin: '', destination: '', estimatedFuelCost: 0 });
+    setForm({ vehicleId: '', driverId: '', cargoWeight: '', origin: '', destination: '', estimatedFuelCost: '' });
     setCargoError('');
     setLicenseError('');
     setModalOpen(true);
   };
 
-  const handleCargoChange = (val: number) => {
+  const handleCargoChange = (val: string) => {
     setForm({ ...form, cargoWeight: val });
+    const numVal = Number(val) || 0;
     const vehicle = vehicles.find((v) => v.id === form.vehicleId);
-    if (vehicle && val > vehicle.capacity) {
+    if (vehicle && numVal > vehicle.capacity) {
       setCargoError(`Cargo exceeds capacity: ${vehicle.capacity}kg max`);
     } else {
       setCargoError('');
@@ -48,7 +49,7 @@ export default function TripsPage() {
   const handleVehicleChange = (vid: string) => {
     setForm({ ...form, vehicleId: vid });
     const vehicle = vehicles.find((v) => v.id === vid);
-    if (vehicle && form.cargoWeight > vehicle.capacity) {
+    if (vehicle && Number(form.cargoWeight) > vehicle.capacity) {
       setCargoError(`Cargo exceeds capacity: ${vehicle.capacity}kg max`);
     } else {
       setCargoError('');
@@ -81,9 +82,12 @@ export default function TripsPage() {
     const vehicle = vehicles.find((v) => v.id === form.vehicleId);
     addTrip({
       ...form,
+      cargoWeight: Number(form.cargoWeight) || 0,
+      estimatedFuelCost: Number(form.estimatedFuelCost) || 0,
       vehicleType: vehicle?.type || '',
       status: 'Draft',
       date: new Date().toISOString().split('T')[0],
+      region: vehicle?.region || '',
     });
     toast({ title: '✓ Trip created successfully', variant: 'default' });
     setModalOpen(false);
@@ -263,7 +267,7 @@ export default function TripsPage() {
             </Select>
           </div>
           <div>
-            <Label>Driver (On Duty & Valid License) *</Label>
+            <Label>Driver (On Duty &amp; Valid License) *</Label>
             <Select value={form.driverId} onValueChange={handleDriverChange}>
               <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue placeholder="Select driver" /></SelectTrigger>
               <SelectContent className="bg-popover border-border">
@@ -284,7 +288,7 @@ export default function TripsPage() {
             <Input
               type="number"
               value={form.cargoWeight}
-              onChange={(e) => handleCargoChange(Number(e.target.value))}
+              onChange={(e) => handleCargoChange(e.target.value)}
               className={`mt-1.5 bg-secondary border-border ${cargoError ? 'border-destructive' : ''}`}
               placeholder="0"
             />
@@ -310,7 +314,7 @@ export default function TripsPage() {
           </div>
           <div className="flex gap-3 pt-4">
             <Button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
-              <CheckCircle className="h-4 w-4 mr-2" />Confirm & Create Trip
+              <CheckCircle className="h-4 w-4 mr-2" />Confirm &amp; Create Trip
             </Button>
             <Button variant="outline" onClick={() => setModalOpen(false)} className="border-border hover:bg-secondary">Cancel</Button>
           </div>

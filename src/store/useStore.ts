@@ -476,7 +476,6 @@ export const useFleetStore = create<FleetState>((set, get) => ({
         console.log('Successfully synced with Supabase backend.');
       } else {
         console.log('Supabase tables are empty. Seeding initial data...');
-        // Optional: Automatic seeding
         await Promise.all([
           supabase.from('vehicles').insert(sampleVehicles),
           supabase.from('drivers').insert(sampleDrivers),

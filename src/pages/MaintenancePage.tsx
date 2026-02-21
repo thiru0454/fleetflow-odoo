@@ -67,7 +67,7 @@ export default function MaintenancePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between animate-fade-in">
         <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent\">Maintenance & Service</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Maintenance &amp; Service</h2>
           <p className="text-sm text-muted-foreground">Preventative and reactive vehicle health tracking</p>
         </div>
         <Button

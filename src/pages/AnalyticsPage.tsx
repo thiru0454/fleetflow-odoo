@@ -11,14 +11,14 @@ export default function AnalyticsPage() {
   const { toast } = useToast();
 
   // Advanced Financial Logic
-  const totalRevenue = trips.filter(t => t.status === 'Completed').length * 2800; // Professional estimate
+  const totalRevenue = trips.filter(t => t.status === 'Completed').length * 2800;
   const fuelCosts = expenses.reduce((acc, e) => acc + e.fuelExpense, 0);
   const maintCosts = maintenanceLogs.reduce((acc, m) => acc + m.cost, 0);
   const totalOperatingCost = fuelCosts + maintCosts;
   const netProfit = totalRevenue - totalOperatingCost;
   const margin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : '0';
 
-  // ROI Calculation (Acquisition)
+  // Fleet utilization
   const totalFleet = vehicles.filter(v => v.status !== 'Retired').length;
   const activeFleet = vehicles.filter(v => v.status === 'On Trip').length;
   const utilizationRate = totalFleet > 0 ? Math.round((activeFleet / totalFleet) * 100) : 0;
@@ -29,14 +29,12 @@ export default function AnalyticsPage() {
     const regionTrips = trips.filter(t => t.region === region && t.status === 'Completed');
     const regionRev = regionTrips.length * 2800;
 
-    // Expenses related to this region via trips
     const regionExpenses = expenses.filter(e => {
       const trip = trips.find(t => t.id === e.tripId);
       return trip?.region === region;
     });
     const regionFuel = regionExpenses.reduce((acc, e) => acc + e.fuelExpense, 0);
 
-    // Vehicles in this region
     const regionVehicles = vehicles.filter(v => v.region === region);
     const regionMaint = maintenanceLogs.filter(m =>
       regionVehicles.some(v => v.id === m.vehicleId)
