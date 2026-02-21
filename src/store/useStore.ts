@@ -17,6 +17,7 @@ export interface Vehicle {
   capacity: number;
   odometer: number;
   status: VehicleStatus;
+  region: string;
 }
 
 export interface Driver {
@@ -41,6 +42,7 @@ export interface Trip {
   estimatedFuelCost: number;
   status: TripStatus;
   date: string;
+  region: string;
 }
 
 export interface MaintenanceLog {
@@ -102,11 +104,11 @@ interface FleetState {
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const sampleVehicles: Vehicle[] = [
-  { id: 'v1', licensePlate: 'ABC-1234', model: 'Volvo FH16', type: 'Heavy Truck', capacity: 25000, odometer: 120450, status: 'Available' },
-  { id: 'v2', licensePlate: 'DEF-5678', model: 'Mercedes Actros', type: 'Heavy Truck', capacity: 22000, odometer: 89200, status: 'On Trip' },
-  { id: 'v3', licensePlate: 'GHI-9012', model: 'Ford Transit', type: 'Van', capacity: 3500, odometer: 45600, status: 'Available' },
-  { id: 'v4', licensePlate: 'JKL-3456', model: 'Scania R500', type: 'Heavy Truck', capacity: 28000, odometer: 200100, status: 'In Shop' },
-  { id: 'v5', licensePlate: 'MNO-7890', model: 'Isuzu NPR', type: 'Medium Truck', capacity: 8000, odometer: 67300, status: 'Available' },
+  { id: 'v1', licensePlate: 'ABC-1234', model: 'Volvo FH16', type: 'Truck', capacity: 25000, odometer: 120450, status: 'Available', region: 'North' },
+  { id: 'v2', licensePlate: 'DEF-5678', model: 'Mercedes Actros', type: 'Truck', capacity: 22000, odometer: 89200, status: 'On Trip', region: 'South' },
+  { id: 'v3', licensePlate: 'GHI-9012', model: 'Ford Transit', type: 'Van', capacity: 3500, odometer: 45600, status: 'Available', region: 'East' },
+  { id: 'v4', licensePlate: 'JKL-3456', model: 'Scania R500', type: 'Truck', capacity: 28000, odometer: 200100, status: 'In Shop', region: 'West' },
+  { id: 'v5', licensePlate: 'MNO-7890', model: 'Honda Super Cub', type: 'Bike', capacity: 150, odometer: 12300, status: 'Available', region: 'North' },
 ];
 
 const sampleDrivers: Driver[] = [
@@ -117,9 +119,9 @@ const sampleDrivers: Driver[] = [
 ];
 
 const sampleTrips: Trip[] = [
-  { id: 'TR-001', vehicleId: 'v2', driverId: 'd1', vehicleType: 'Heavy Truck', origin: 'Chicago, IL', destination: 'Detroit, MI', cargoWeight: 18000, estimatedFuelCost: 450, status: 'Dispatched', date: '2026-02-20' },
-  { id: 'TR-002', vehicleId: 'v1', driverId: 'd2', vehicleType: 'Heavy Truck', origin: 'Dallas, TX', destination: 'Houston, TX', cargoWeight: 12000, estimatedFuelCost: 280, status: 'Completed', date: '2026-02-18' },
-  { id: 'TR-003', vehicleId: 'v3', driverId: 'd4', vehicleType: 'Van', origin: 'NYC, NY', destination: 'Boston, MA', cargoWeight: 2800, estimatedFuelCost: 120, status: 'Draft', date: '2026-02-21' },
+  { id: 'TR-001', vehicleId: 'v2', driverId: 'd1', vehicleType: 'Truck', origin: 'Chicago, IL', destination: 'Detroit, MI', cargoWeight: 18000, estimatedFuelCost: 450, status: 'Dispatched', date: '2026-02-20', region: 'South' },
+  { id: 'TR-002', vehicleId: 'v1', driverId: 'd2', vehicleType: 'Truck', origin: 'Dallas, TX', destination: 'Houston, TX', cargoWeight: 12000, estimatedFuelCost: 280, status: 'Completed', date: '2026-02-18', region: 'North' },
+  { id: 'TR-003', vehicleId: 'v3', driverId: 'd4', vehicleType: 'Van', origin: 'NYC, NY', destination: 'Boston, MA', cargoWeight: 2800, estimatedFuelCost: 120, status: 'Draft', date: '2026-02-21', region: 'East' },
 ];
 
 const sampleMaintenance: MaintenanceLog[] = [
