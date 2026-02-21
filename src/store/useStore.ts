@@ -260,12 +260,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   loginWithGoogle: async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
+    try {
+      // Use the current origin which should be http://localhost:8080
+      const redirectUrl = window.location.origin;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        console.error('Google OAuth error:', error);
+        throw new Error(error.message || 'Google login failed. Make sure http://localhost:8080 is added to Supabase redirect URIs.');
+      }
+    } catch (error) {
+      console.error('Google login exception:', error);
+      throw error;
+    }
   },
 
   logout: async () => {
