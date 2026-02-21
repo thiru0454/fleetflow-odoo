@@ -1,4 +1,4 @@
-import { useFleetStoreEnhanced } from '@/store/useStoreEnhanced';
+import { useFleetStore } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, AlertTriangle, UserCheck, Calendar, Activity, TrendingUp, ShieldAlert, CheckCircle2 } from 'lucide-react';
@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { cn } from '@/lib/utils';
 
 export default function SafetyDashboardPage() {
-    const { drivers, incidents } = useFleetStoreEnhanced();
+    const { vehicles, trips, incidents, inspections, drivers } = useFleetStore();
 
     // Safety KPIs
     const avgSafetyScore = Math.round(drivers.reduce((acc, d) => acc + d.safetyScore, 0) / drivers.length);

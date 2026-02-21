@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, Vehicle, VehicleStatus } from '@/store/useStoreEnhanced';
+import { useFleetStore, Vehicle, VehicleStatus } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function VehiclesEnhancedPage() {
-    const { vehicles, addVehicle, updateVehicle } = useFleetStoreEnhanced();
+    const { vehicles, addVehicle, updateVehicle, deleteVehicle } = useFleetStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
     const [isAdding, setIsAdding] = useState(false);

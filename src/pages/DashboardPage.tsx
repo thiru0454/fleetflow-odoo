@@ -34,7 +34,9 @@ export default function DashboardPage() {
         v?.model.toLowerCase().includes(search.toLowerCase()) ||
         d?.name.toLowerCase().includes(search.toLowerCase());
       const matchStatus = statusFilter === 'all' || t.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchType = typeFilter === 'all' || t.vehicleType === typeFilter;
+      const matchRegion = regionFilter === 'all' || t.region === regionFilter;
+      return matchSearch && matchStatus && matchType && matchRegion;
     })
     .slice(0, 8); // Show only 8 recent trips
 

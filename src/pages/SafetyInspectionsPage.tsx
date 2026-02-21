@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, SafetyInspection, Vehicle } from '@/store/useStoreEnhanced';
+import { useFleetStore } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 
 export default function SafetyInspectionsPage() {
-    const { inspections, vehicles, addSafetyInspection } = useFleetStoreEnhanced();
+    const { vehicles, inspections, addSafetyInspection } = useFleetStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
     const [isAdding, setIsAdding] = useState(false);

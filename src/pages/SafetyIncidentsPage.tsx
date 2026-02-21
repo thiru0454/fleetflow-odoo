@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, SafetyIncident, IncidentSeverity, IncidentStatus } from '@/store/useStoreEnhanced';
+import { useFleetStore, SafetyIncident, IncidentSeverity, IncidentStatus } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 
 export default function SafetyIncidentsPage() {
-    const { incidents, vehicles, drivers, addSafetyIncident, updateSafetyIncident } = useFleetStoreEnhanced();
+    const { vehicles, drivers, incidents, addSafetyIncident, updateSafetyIncident } = useFleetStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
     const [isAdding, setIsAdding] = useState(false);
@@ -178,7 +178,7 @@ export default function SafetyIncidentsPage() {
                         const vehicle = vehicles.find(v => v.id === incident.vehicleId);
                         const driver = drivers.find(d => d.id === incident.driverId);
                         return (
-                            <div key={incident.id} className="p-6 hover:bg-primary/5 transition-all animate-fade-in group" style={{ animationDelay: `${i * 30}ms` }}>
+                            <div key={incident.id} className="p-6 hover:bg-primary/5 transition-all animate-fade-in group" style={{ animationDelay: `${i * 30} ms` }}>
                                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                                     <div className="space-y-3 flex-1">
                                         <div className="flex flex-wrap items-center gap-2">

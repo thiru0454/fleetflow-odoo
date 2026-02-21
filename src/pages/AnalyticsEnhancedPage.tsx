@@ -1,4 +1,4 @@
-import { useFleetStoreEnhanced } from '@/store/useStoreEnhanced';
+import { useFleetStore } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AnalyticsEnhancedPage() {
-    const { expenses, vehicles, trips, maintenanceLogs } = useFleetStoreEnhanced();
+    const { vehicles, trips, maintenanceLogs, expenses } = useFleetStore();
     const { toast } = useToast();
 
     // Advanced Financial Logic

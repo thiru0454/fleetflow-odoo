@@ -4,12 +4,12 @@ import { KpiCard } from '@/components/KpiCard';
 import { StatusBadge } from '@/components/StatusBadge';
 import { FilterBar } from '@/components/FilterBar';
 import { Button } from '@/components/ui/button';
-import { useFleetStoreEnhanced } from '@/store/useStoreEnhanced';
+import { useAuthStore, useFleetStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export default function DashboardEnhancedPage() {
-    const { vehicles, trips, maintenanceLogs, drivers, expenses } = useFleetStoreEnhanced();
+    const { vehicles, drivers, trips, maintenanceLogs, expenses } = useFleetStore();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');

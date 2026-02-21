@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced } from '@/store/useStoreEnhanced';
+import { useFleetStore } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,18 +7,51 @@ import { FileDown, FileText, Printer, ShieldCheck, AlertCircle, Calendar, Filter
 import { cn } from '@/lib/utils';
 
 export default function SafetyReportsPage() {
-    const { incidents, inspections, drivers } = useFleetStoreEnhanced();
+    const { vehicles, drivers, incidents, inspections } = useFleetStore();
     const [reportType, setReportType] = useState<'incidents' | 'inspections' | 'compliance'>('compliance');
 
     const stats = {
         totalIncidents: incidents.length,
         criticalIncidents: incidents.filter(i => i.severity === 'Critical').length,
         totalInspections: inspections.length,
-        passRate: Math.round((inspections.filter(i => i.status === 'Pass').length / inspections.length) * 100),
+        passRate: inspections.length > 0 ? Math.round((inspections.filter(i => i.status === 'Pass').length / inspections.length) * 100) : 100,
         expiringLicenses: drivers.filter(d => {
             const days = Math.ceil((new Date(d.licenseExpiry).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
             return days > 0 && days <= 30;
         }).length
+    };
+
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const handleExportCSV = () => {
+        let data = [];
+        let filename = `fleetflow-safety-report-${new Date().toISOString().split('T')[0]}.csv`;
+
+        if (reportType === 'compliance') {
+            data = drivers.map(d => ({ Name: d.name, License: d.licenseNumber, Expiry: d.licenseExpiry, Score: d.safetyScore }));
+        } else if (reportType === 'incidents') {
+            data = incidents.map(i => ({ Date: i.date, Type: i.type, Asset: i.vehicleId, Severity: i.severity, Status: i.status }));
+        } else {
+            data = inspections.map(i => ({ Date: i.date, Asset: i.vehicleId, Inspector: i.inspectorId, Status: i.status, Notes: i.notes }));
+        }
+
+        if (data.length === 0) return;
+
+        const headers = Object.keys(data[0]).join(',');
+        const rows = data.map(obj => Object.values(obj).map(val => `"${val}"`).join(','));
+        const csvContent = [headers, ...rows].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -28,11 +61,11 @@ export default function SafetyReportsPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Regulatory Compliance Portal</h1>
                     <p className="text-muted-foreground mt-1">Generate, print, and export formalized safety performance reports.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2 border-border/50">
+                <div className="flex gap-2 print:hidden">
+                    <Button variant="outline" className="gap-2 border-border/50" onClick={handlePrint}>
                         <Printer className="h-4 w-4" /> Print View
                     </Button>
-                    <Button className="gap-2 bg-primary">
+                    <Button className="gap-2 bg-primary" onClick={handleExportCSV}>
                         <FileDown className="h-4 w-4" /> Export All Data (CSV)
                     </Button>
                 </div>

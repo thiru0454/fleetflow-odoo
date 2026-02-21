@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, Driver } from '@/store/useStoreEnhanced';
+import { useFleetStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Award, Search, TrendingUp, TrendingDown, User, AlertTriangle, Star, Shi
 import { cn } from '@/lib/utils';
 
 export default function DriversEnhancedPage() {
-    const { drivers } = useFleetStoreEnhanced();
+    const { drivers, addDriver, updateDriver } = useFleetStore();
     const [search, setSearch] = useState('');
 
     const filteredDrivers = drivers.filter(d =>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, Driver } from '@/store/useStoreEnhanced';
+import { useFleetStore, Driver } from '@/store/useStore';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function SafetyCompliancePage() {
-    const { drivers, updateDriverPerformance } = useFleetStoreEnhanced();
+    const { drivers, isLicenseExpired, updateDriverPerformance } = useFleetStore();
     const { toast } = useToast();
     const [search, setSearch] = useState('');
     const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
@@ -149,7 +149,7 @@ export default function SafetyCompliancePage() {
                         </thead>
                         <tbody>
                             {filteredDrivers.map((d, i) => (
-                                <tr key={d.id} className="hover:bg-primary/5 transition-colors animate-fade-in" style={{ animationDelay: `${i * 30}ms` }}>
+                                <tr key={d.id} className="hover:bg-primary/5 transition-colors animate-fade-in" style={{ animationDelay: `${i * 30} ms` }}>
                                     <td className="py-4 font-bold text-sm">{d.name}</td>
                                     <td>
                                         <div className="flex flex-col">

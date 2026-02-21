@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, Vehicle, Driver, TripStatus } from '@/store/useStoreEnhanced';
+import { useFleetStore, TripStatus } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 export default function TripsEnhancedPage() {
-    const { vehicles, drivers, trips, addTrip } = useFleetStoreEnhanced();
+    const { trips, vehicles, drivers, addTrip, updateTrip } = useFleetStore();
     const { toast } = useToast();
 
     const [origin, setOrigin] = useState('');

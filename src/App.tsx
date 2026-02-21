@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/store/useStore";
+import { useAuthStore, useFleetStore } from "@/store/useStore";
 import { AppLayout } from "@/components/AppLayout";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
 import LandingPage from "./pages/LandingPage";
@@ -27,10 +27,13 @@ const queryClient = new QueryClient();
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const initialize = useAuthStore((s) => s.initialize);
+  const fetchFleetData = useFleetStore((s) => s.fetchFleetData);
+
   useEffect(() => {
     const unsubscribe = initialize();
+    fetchFleetData();
     return unsubscribe;
-  }, [initialize]);
+  }, [initialize, fetchFleetData]);
   return <>{children}</>;
 }
 

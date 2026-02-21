@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFleetStoreEnhanced, MaintenanceLog, Vehicle } from '@/store/useStoreEnhanced';
+import { useFleetStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 
 export default function MaintenanceEnhancedPage() {
-    const { maintenanceLogs, vehicles } = useFleetStoreEnhanced();
+    const { maintenanceLogs, vehicles, addMaintenanceLog, updateMaintenanceLog } = useFleetStore();
     const [search, setSearch] = useState('');
 
     // Safety rule: Flag vehicles > 150,000km
