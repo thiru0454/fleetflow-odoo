@@ -11,11 +11,11 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', roles: ['fleet_manager', 'dispatcher'] },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', roles: ['fleet_manager', 'dispatcher', 'financial_analyst'] },
   { label: 'Vehicle Registry', icon: Truck, path: '/vehicles', roles: ['fleet_manager'] },
-  { label: 'Trip Dispatcher', icon: Route, path: '/trips', roles: ['fleet_manager', 'dispatcher'] },
+  { label: 'Trips', icon: Route, path: '/trips', roles: ['fleet_manager', 'dispatcher'] },
   { label: 'Maintenance', icon: Wrench, path: '/maintenance', roles: ['fleet_manager'] },
-  { label: 'Trip & Expense', icon: Receipt, path: '/expenses', roles: ['fleet_manager', 'financial_analyst'] },
+  { label: 'Trips & Expenses', icon: Receipt, path: '/expenses', roles: ['fleet_manager', 'financial_analyst'] },
   { label: 'Driver Performance', icon: Users, path: '/drivers', roles: ['fleet_manager', 'safety_officer'] },
   { label: 'Safety Dashboard', icon: LayoutDashboard, path: '/safety-dashboard', roles: ['safety_officer'] },
   { label: 'Compliance Hub', icon: ShieldCheck, path: '/safety', roles: ['fleet_manager', 'safety_officer'] },
