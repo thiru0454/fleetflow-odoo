@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { supabase } from '@/integrations/supabase/client';
+import type { Session, User } from '@supabase/supabase-js';
 
 export type UserRole = 'fleet_manager' | 'dispatcher' | 'safety_officer' | 'financial_analyst';
 
@@ -65,9 +67,16 @@ export interface Expense {
 interface AuthState {
   isAuthenticated: boolean;
   user: { name: string; email: string; role: UserRole } | null;
-  login: (email: string, password: string, role: UserRole) => void;
-  register: (name: string, email: string, password: string, role: UserRole) => void;
-  logout: () => void;
+  session: Session | null;
+  supabaseUser: User | null;
+  loading: boolean;
+  setSession: (session: Session | null) => void;
+  setRole: (role: UserRole) => void;
+  login: (email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
+  register: (name: string, email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
+  initialize: () => () => void;
 }
 
 interface FleetState {
@@ -121,18 +130,100 @@ const sampleExpenses: Expense[] = [
   { id: 'EX-002', tripId: 'TR-001', driverId: 'd1', distance: 450, fuelExpense: 420, fuelLiters: 150, miscExpense: 30, date: '2026-02-20', status: 'Pending' },
 ];
 
-export const useAuthStore = create<AuthState>((set) => ({
+async function fetchUserRole(userId: string): Promise<UserRole> {
+  const { data } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .single();
+  return (data?.role as UserRole) || 'fleet_manager';
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   user: null,
-  login: (email, _password, role) => set({
-    isAuthenticated: true,
-    user: { name: email.split('@')[0], email, role },
-  }),
-  register: (name, email, _password, role) => set({
-    isAuthenticated: true,
-    user: { name, email, role },
-  }),
-  logout: () => set({ isAuthenticated: false, user: null }),
+  session: null,
+  supabaseUser: null,
+  loading: true,
+
+  setSession: async (session) => {
+    if (session?.user) {
+      const role = await fetchUserRole(session.user.id);
+      const meta = session.user.user_metadata;
+      set({
+        isAuthenticated: true,
+        session,
+        supabaseUser: session.user,
+        user: {
+          name: meta?.name || meta?.full_name || session.user.email?.split('@')[0] || 'User',
+          email: session.user.email || '',
+          role,
+        },
+        loading: false,
+      });
+    } else {
+      set({
+        isAuthenticated: false,
+        session: null,
+        supabaseUser: null,
+        user: null,
+        loading: false,
+      });
+    }
+  },
+
+  setRole: (role) => {
+    const { user } = get();
+    if (user) set({ user: { ...user, role } });
+  },
+
+  login: async (email, password, _role) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    // session listener handles the rest
+    return { error: null };
+  },
+
+  register: async (name, email, password, role) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name, role },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (error) return { error: error.message };
+    return { error: null };
+  },
+
+  loginWithGoogle: async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/dashboard',
+      },
+    });
+  },
+
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({ isAuthenticated: false, session: null, supabaseUser: null, user: null });
+  },
+
+  initialize: () => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      get().setSession(session);
+    });
+
+    // Then check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      get().setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  },
 }));
 
 export const useFleetStore = create<FleetState>((set) => ({
