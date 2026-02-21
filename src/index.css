@@ -221,3 +221,4 @@
   .appear-smooth {
     @apply opacity-0 animate-fade-in;
   }
+}
