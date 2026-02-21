@@ -2,7 +2,8 @@ import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Truck, Route, Wrench, Receipt, Users, BarChart3,
-  Bell, LogOut, ChevronLeft, Menu, Zap
+  Bell, LogOut, ChevronLeft, Menu, Zap, ShieldCheck, Activity, ShieldAlert,
+  ClipboardCheck, FileDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore, UserRole } from '@/store/useStore';
@@ -16,6 +17,11 @@ const navItems = [
   { label: 'Maintenance', icon: Wrench, path: '/maintenance', roles: ['fleet_manager'] },
   { label: 'Trip & Expense', icon: Receipt, path: '/expenses', roles: ['fleet_manager', 'financial_analyst'] },
   { label: 'Driver Performance', icon: Users, path: '/drivers', roles: ['fleet_manager', 'safety_officer'] },
+  { label: 'Safety Dashboard', icon: LayoutDashboard, path: '/safety-dashboard', roles: ['safety_officer'] },
+  { label: 'Compliance Hub', icon: ShieldCheck, path: '/safety', roles: ['fleet_manager', 'safety_officer'] },
+  { label: 'Incident Investigation', icon: ShieldAlert, path: '/safety-incidents', roles: ['fleet_manager', 'safety_officer'] },
+  { label: 'Safety Inspections', icon: ClipboardCheck, path: '/safety-inspections', roles: ['fleet_manager', 'safety_officer'] },
+  { label: 'Compliance Reports', icon: FileDown, path: '/safety-reports', roles: ['fleet_manager', 'safety_officer'] },
   { label: 'Analytics', icon: BarChart3, path: '/analytics', roles: ['fleet_manager', 'financial_analyst'] },
 ];
 
