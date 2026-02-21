@@ -76,6 +76,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <AppLayout>{children}</AppLayout>;
 }
 
+/** Redirects to /dashboard if user's role is not in the allowed list */
+function RoleRoute({ children, roles }: { children: React.ReactNode; roles: string[] }) {
+  const { user } = useAuthStore();
+  if (!user || !roles.includes(user.role)) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -87,18 +94,31 @@ const App = () => (
           <Routes>
             <Route path="/" element={<RootPage />} />
             <Route path="/login" element={<AuthPage />} />
+
+            {/* All authenticated roles */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/vehicles" element={<ProtectedRoute><VehiclesPage /></ProtectedRoute>} />
-            <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
-            <Route path="/maintenance" element={<ProtectedRoute><MaintenancePage /></ProtectedRoute>} />
-            <Route path="/expenses" element={<ProtectedRoute><ExpensesPage /></ProtectedRoute>} />
-            <Route path="/drivers" element={<ProtectedRoute><DriversPage /></ProtectedRoute>} />
-            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
-            <Route path="/safety-dashboard" element={<ProtectedRoute><SafetyDashboard /></ProtectedRoute>} />
-            <Route path="/safety-incidents" element={<ProtectedRoute><SafetyIncidents /></ProtectedRoute>} />
-            <Route path="/safety-inspections" element={<ProtectedRoute><SafetyInspections /></ProtectedRoute>} />
-            <Route path="/safety-reports" element={<ProtectedRoute><SafetyReports /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+
+            {/* Fleet Manager only */}
+            <Route path="/vehicles" element={<ProtectedRoute><RoleRoute roles={['fleet_manager']}><VehiclesPage /></RoleRoute></ProtectedRoute>} />
+            <Route path="/maintenance" element={<ProtectedRoute><RoleRoute roles={['fleet_manager']}><MaintenancePage /></RoleRoute></ProtectedRoute>} />
+
+            {/* Fleet Manager + Dispatcher */}
+            <Route path="/trips" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'dispatcher']}><TripsPage /></RoleRoute></ProtectedRoute>} />
+
+            {/* Fleet Manager + Financial Analyst */}
+            <Route path="/expenses" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'financial_analyst']}><ExpensesPage /></RoleRoute></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'financial_analyst']}><AnalyticsPage /></RoleRoute></ProtectedRoute>} />
+
+            {/* Fleet Manager + Safety Officer */}
+            <Route path="/drivers" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'safety_officer']}><DriversPage /></RoleRoute></ProtectedRoute>} />
+            <Route path="/safety" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'safety_officer']}><SafetyPage /></RoleRoute></ProtectedRoute>} />
+            <Route path="/safety-incidents" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'safety_officer']}><SafetyIncidents /></RoleRoute></ProtectedRoute>} />
+            <Route path="/safety-inspections" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'safety_officer']}><SafetyInspections /></RoleRoute></ProtectedRoute>} />
+            <Route path="/safety-reports" element={<ProtectedRoute><RoleRoute roles={['fleet_manager', 'safety_officer']}><SafetyReports /></RoleRoute></ProtectedRoute>} />
+
+            {/* Safety Officer only */}
+            <Route path="/safety-dashboard" element={<ProtectedRoute><RoleRoute roles={['safety_officer']}><SafetyDashboard /></RoleRoute></ProtectedRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthInitializer>

@@ -41,7 +41,9 @@ export default function DashboardPage() {
       const matchSearch = !search || t.id.toLowerCase().includes(search.toLowerCase()) ||
         v?.model.toLowerCase().includes(search.toLowerCase()) ||
         d?.name.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = statusFilter === 'all' || t.status === statusFilter;
+      const matchStatus = statusFilter === 'all'
+        || t.status === statusFilter
+        || v?.status === statusFilter;
       const matchType = typeFilter === 'all' || v?.type === typeFilter;
       const matchRegion = regionFilter === 'all' || v?.region === regionFilter;
       return matchSearch && matchStatus && matchType && matchRegion;
@@ -84,7 +86,7 @@ export default function DashboardPage() {
           />
         </div>
         <div
-          onClick={() => { clearFilters(); setSearch('In Shop'); }}
+          onClick={() => { clearFilters(); setStatusFilter('In Shop'); }}
           className="cursor-pointer transition-transform hover:scale-105 active:scale-95"
         >
           <KpiCard
@@ -159,6 +161,7 @@ export default function DashboardPage() {
               { label: 'Dispatched', value: 'Dispatched' },
               { label: 'Completed', value: 'Completed' },
               { label: 'Cancelled', value: 'Cancelled' },
+              { label: 'In Shop', value: 'In Shop' },
             ],
           },
           {

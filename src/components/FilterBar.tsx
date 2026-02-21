@@ -29,11 +29,10 @@ export function FilterBar({ searchValue, onSearch, searchPlaceholder = 'Search..
       {filters?.map((f) => (
         <Select key={f.label} value={f.value} onValueChange={f.onChange}>
           <SelectTrigger className="w-[160px] bg-secondary border-border">
-            <SlidersHorizontal className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-            <SelectValue placeholder={f.label} />
+            <SlidersHorizontal className="h-3.5 w-3.5 mr-2 text-muted-foreground shrink-0" />
+            <SelectValue placeholder={`All ${f.label}`} />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border">
-            <SelectItem value="all">All {f.label}</SelectItem>
             {f.options.map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}

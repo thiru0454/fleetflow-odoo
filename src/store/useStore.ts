@@ -132,6 +132,7 @@ interface FleetState {
   addExpense: (e: Omit<Expense, 'id'>) => Promise<void>;
   addDriver: (d: Omit<Driver, 'id'>) => Promise<void>;
   updateDriver: (id: string, d: Partial<Driver>) => Promise<void>;
+  deleteDriver: (id: string) => Promise<void>;
   updateDriverPerformance: (id: string, updates: { safetyScore?: number; complaints?: number }) => Promise<void>;
   isLicenseExpired: (date: string) => boolean;
   addSafetyIncident: (i: Omit<SafetyIncident, 'id'>) => Promise<void>;
@@ -346,21 +347,32 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   incidents: sampleIncidents,
   inspections: sampleInspections,
   addVehicle: async (v) => {
-    const { data, error } = await supabase.from('vehicles').insert([{ ...v, id: uid() }]).select();
-    if (data) set((s) => ({ vehicles: [...s.vehicles, data[0] as Vehicle] }));
+    const newId = uid();
+    const newVehicle = { ...v, id: newId } as Vehicle;
+    set((s) => ({ vehicles: [...s.vehicles, newVehicle] }));
+    supabase.from('vehicles').insert([newVehicle]).then(({ error }) => {
+      if (error) console.error('Supabase addVehicle error:', error.message);
+    });
   },
   updateVehicle: async (id, v) => {
-    const { data, error } = await supabase.from('vehicles').update(v).eq('id', id).select();
-    if (data) set((s) => ({ vehicles: s.vehicles.map((x) => x.id === id ? { ...x, ...v } : x) }));
+    set((s) => ({ vehicles: s.vehicles.map((x) => x.id === id ? { ...x, ...v } : x) }));
+    supabase.from('vehicles').update(v).eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase updateVehicle error:', error.message);
+    });
   },
   deleteVehicle: async (id) => {
-    const { error } = await supabase.from('vehicles').delete().eq('id', id);
-    if (!error) set((s) => ({ vehicles: s.vehicles.filter((x) => x.id !== id) }));
+    set((s) => ({ vehicles: s.vehicles.filter((x) => x.id !== id) }));
+    supabase.from('vehicles').delete().eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase deleteVehicle error:', error.message);
+    });
   },
   addTrip: async (t) => {
     const id = `TR-${String(get().trips.length + 1).padStart(3, '0')}`;
-    const { data, error } = await supabase.from('trips').insert([{ ...t, id }]).select();
-    if (data) set((s) => ({ trips: [...s.trips, data[0] as Trip] }));
+    const newTrip = { ...t, id } as Trip;
+    set((s) => ({ trips: [...s.trips, newTrip] }));
+    supabase.from('trips').insert([newTrip]).then(({ error }) => {
+      if (error) console.error('Supabase addTrip error:', error.message);
+    });
   },
   updateTrip: async (id, t) => {
     const trip = get().trips.find(x => x.id === id);
@@ -406,51 +418,76 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   },
   addMaintenanceLog: async (m) => {
     const id = `ML-${String(get().maintenanceLogs.length + 1).padStart(3, '0')}`;
-    const { data, error } = await supabase.from('maintenance_logs').insert([{ ...m, id }]).select();
-    if (data) {
-      set((s) => ({
-        maintenanceLogs: [...s.maintenanceLogs, data[0] as MaintenanceLog],
-        vehicles: s.vehicles.map((v) => v.id === m.vehicleId ? { ...v, status: 'In Shop' as VehicleStatus } : v),
-      }));
-    }
+    const newLog = { ...m, id } as MaintenanceLog;
+    set((s) => ({
+      maintenanceLogs: [...s.maintenanceLogs, newLog],
+      vehicles: s.vehicles.map((v) => v.id === m.vehicleId ? { ...v, status: 'In Shop' as VehicleStatus } : v),
+    }));
+    supabase.from('maintenance_logs').insert([newLog]).then(({ error }) => {
+      if (error) console.error('Supabase addMaintenanceLog error:', error.message);
+    });
   },
   updateMaintenanceLog: async (id, m) => {
-    const { data, error } = await supabase.from('maintenance_logs').update(m).eq('id', id).select();
-    if (data) set((s) => ({ maintenanceLogs: s.maintenanceLogs.map((x) => x.id === id ? { ...x, ...m } : x) }));
+    set((s) => ({ maintenanceLogs: s.maintenanceLogs.map((x) => x.id === id ? { ...x, ...m } : x) }));
+    supabase.from('maintenance_logs').update(m).eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase updateMaintenanceLog error:', error.message);
+    });
   },
   addExpense: async (e) => {
     const id = `EX-${String(get().expenses.length + 1).padStart(3, '0')}`;
-    const { data, error } = await supabase.from('expenses').insert([{ ...e, id }]).select();
-    if (data) set((s) => ({ expenses: [...s.expenses, data[0] as Expense] }));
+    const newExpense = { ...e, id } as Expense;
+    set((s) => ({ expenses: [...s.expenses, newExpense] }));
+    supabase.from('expenses').insert([newExpense]).then(({ error }) => {
+      if (error) console.error('Supabase addExpense error:', error.message);
+    });
   },
   addDriver: async (d) => {
-    const { data, error } = await supabase.from('drivers').insert([{ ...d, id: uid() }]).select();
-    if (data) set((s) => ({ drivers: [...s.drivers, data[0] as Driver] }));
+    const newDriver = { ...d, id: uid() } as Driver;
+    set((s) => ({ drivers: [...s.drivers, newDriver] }));
+    supabase.from('drivers').insert([newDriver]).then(({ error }) => {
+      if (error) console.error('Supabase addDriver error:', error.message);
+    });
   },
   updateDriver: async (id, d) => {
-    const { data, error } = await supabase.from('drivers').update(d).eq('id', id).select();
-    if (data) set((s) => ({ drivers: s.drivers.map((x) => x.id === id ? { ...x, ...d } : x) }));
+    set((s) => ({ drivers: s.drivers.map((x) => x.id === id ? { ...x, ...d } : x) }));
+    supabase.from('drivers').update(d).eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase updateDriver error:', error.message);
+    });
+  },
+  deleteDriver: async (id) => {
+    set((s) => ({ drivers: s.drivers.filter((x) => x.id !== id) }));
+    supabase.from('drivers').delete().eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase deleteDriver error:', error.message);
+    });
   },
   updateDriverPerformance: async (id, updates) => {
-    const { data, error } = await supabase.from('drivers').update(updates).eq('id', id).select();
-    if (data) set((s) => ({
-      drivers: s.drivers.map((d) => d.id === id ? { ...d, ...updates } : d)
-    }));
+    set((s) => ({ drivers: s.drivers.map((d) => d.id === id ? { ...d, ...updates } : d) }));
+    supabase.from('drivers').update(updates).eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase updateDriverPerformance error:', error.message);
+    });
   },
   isLicenseExpired: (date: string) => new Date(date) < new Date(),
   addSafetyIncident: async (i) => {
     const id = `INC-${String(get().incidents.length + 1).padStart(3, '0')}`;
-    const { data, error } = await supabase.from('safety_incidents').insert([{ ...i, id }]).select();
-    if (data) set((s) => ({ incidents: [...s.incidents, data[0] as SafetyIncident] }));
+    const newIncident = { ...i, id } as SafetyIncident;
+    set((s) => ({ incidents: [...s.incidents, newIncident] }));
+    supabase.from('safety_incidents').insert([newIncident]).then(({ error }) => {
+      if (error) console.error('Supabase addSafetyIncident error:', error.message);
+    });
   },
   updateSafetyIncident: async (id, i) => {
-    const { data, error } = await supabase.from('safety_incidents').update(i).eq('id', id).select();
-    if (data) set((s) => ({ incidents: s.incidents.map((x) => x.id === id ? { ...x, ...i } : x) }));
+    set((s) => ({ incidents: s.incidents.map((x) => x.id === id ? { ...x, ...i } : x) }));
+    supabase.from('safety_incidents').update(i).eq('id', id).then(({ error }) => {
+      if (error) console.error('Supabase updateSafetyIncident error:', error.message);
+    });
   },
   addSafetyInspection: async (i) => {
     const id = `SI-${String(get().inspections.length + 1).padStart(3, '0')}`;
-    const { data, error } = await supabase.from('safety_inspections').insert([{ ...i, id }]).select();
-    if (data) set((s) => ({ inspections: [...s.inspections, data[0] as SafetyInspection] }));
+    const newInspection = { ...i, id } as SafetyInspection;
+    set((s) => ({ inspections: [...s.inspections, newInspection] }));
+    supabase.from('safety_inspections').insert([newInspection]).then(({ error }) => {
+      if (error) console.error('Supabase addSafetyInspection error:', error.message);
+    });
   },
   fetchFleetData: async () => {
     try {

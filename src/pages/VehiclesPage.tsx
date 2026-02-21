@@ -21,12 +21,12 @@ export default function VehiclesPage() {
   const { toast } = useToast();
 
   const [form, setForm] = useState({
-    licensePlate: '', model: '', type: '', capacity: '' as string | number, odometer: '' as string | number, status: 'Available' as VehicleStatus, acquisitionCost: '' as string | number,
+    licensePlate: '', model: '', type: '', capacity: '' as string | number, odometer: '' as string | number, status: 'Available' as VehicleStatus, region: '',
   });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ licensePlate: '', model: '', type: '', capacity: '', odometer: '', status: 'Available', acquisitionCost: '' });
+    setForm({ licensePlate: '', model: '', type: '', capacity: '', odometer: '', status: 'Available', region: '' });
     setModalOpen(true);
   };
 
@@ -39,7 +39,7 @@ export default function VehiclesPage() {
       capacity: v.capacity,
       odometer: v.odometer,
       status: v.status,
-      acquisitionCost: v.acquisitionCost
+      region: v.region
     });
     setModalOpen(true);
   };
@@ -54,7 +54,6 @@ export default function VehiclesPage() {
         ...form,
         capacity: Number(form.capacity) || 0,
         odometer: Number(form.odometer) || 0,
-        acquisitionCost: Number(form.acquisitionCost) || 0
       });
       toast({ title: 'Vehicle updated' });
     } else {
@@ -66,7 +65,6 @@ export default function VehiclesPage() {
         ...form,
         capacity: Number(form.capacity) || 0,
         odometer: Number(form.odometer) || 0,
-        acquisitionCost: Number(form.acquisitionCost) || 0
       });
       toast({ title: 'Vehicle created' });
     }
@@ -179,8 +177,8 @@ export default function VehiclesPage() {
               <Input type="number" value={form.odometer} onChange={(e) => setForm({ ...form, odometer: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
             </div>
             <div>
-              <Label>Acquisition Cost ($)</Label>
-              <Input type="number" value={form.acquisitionCost} onChange={(e) => setForm({ ...form, acquisitionCost: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
+              <Label>Region</Label>
+              <Input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="North, South, East, West" />
             </div>
           </div>
           <div>
