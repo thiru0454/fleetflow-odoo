@@ -93,13 +93,11 @@ interface FleetState {
   deleteVehicle: (id: string) => void;
   addTrip: (t: Omit<Trip, 'id'>) => void;
   updateTrip: (id: string, t: Partial<Trip>) => void;
-  deleteTrip: (id: string) => void;
   addMaintenanceLog: (m: Omit<MaintenanceLog, 'id'>) => void;
   updateMaintenanceLog: (id: string, m: Partial<MaintenanceLog>) => void;
   addExpense: (e: Omit<Expense, 'id'>) => void;
   addDriver: (d: Omit<Driver, 'id'>) => void;
   updateDriver: (id: string, d: Partial<Driver>) => void;
-  deleteDriver: (id: string) => void;
   isLicenseExpired: (date: string) => boolean;
 }
 
@@ -142,15 +140,15 @@ async function fetchUserRole(userId: string): Promise<{ role: UserRole; isNew: b
     .select('role, confirmed_by_user')
     .eq('user_id', userId)
     .single();
-
+  
   // If no role found, user is brand new
   if (!data) return { role: 'fleet_manager', isNew: true };
-
+  
   // If role exists but NOT confirmed by user, it's an auto-created role (OAuth default) - force selection
   if (data.confirmed_by_user === false || data.confirmed_by_user === null) {
     return { role: data.role as UserRole, isNew: true };
   }
-
+  
   return { role: data.role as UserRole, isNew: false };
 }
 
@@ -167,10 +165,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { role, isNew } = await fetchUserRole(session.user.id);
       const meta = session.user.user_metadata;
       const isOAuth = session.user.app_metadata?.provider === 'google';
-
+      
       // For OAuth users, force role selection if newly signed up
       const forceRoleSelection = isOAuth && isNew;
-
+      
       set({
         isAuthenticated: true,
         session,
@@ -243,7 +241,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     });
     if (error) return { error: error.message };
-
+    
     // If email confirmation is disabled, user will have an active session
     // If enabled, user will need to confirm email
     if (data.session) {
@@ -252,33 +250,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .from('user_roles')
         .insert({ user_id: data.user!.id, role, confirmed_by_user: true })
         .single();
-
+      
       await get().setSession(data.session);
     }
-
+    
     return { error: null };
   },
 
   loginWithGoogle: async () => {
-    try {
-      // Use the current origin which should be http://localhost:8080
-      const redirectUrl = window.location.origin;
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-        },
-      });
-
-      if (error) {
-        console.error('Google OAuth error:', error);
-        throw new Error(error.message || 'Google login failed. Make sure http://localhost:8080 is added to Supabase redirect URIs.');
-      }
-    } catch (error) {
-      console.error('Google login exception:', error);
-      throw error;
-    }
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
   },
 
   logout: async () => {
@@ -314,7 +299,7 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   updateTrip: (id, t) => set((s) => {
     const trip = s.trips.find(x => x.id === id);
     if (!trip) return { trips: s.trips };
-
+    
     const updatedTrip = { ...trip, ...t };
     let updatedVehicles = s.vehicles;
     let updatedDrivers = s.drivers;
@@ -353,7 +338,6 @@ export const useFleetStore = create<FleetState>((set, get) => ({
       drivers: updatedDrivers,
     };
   }),
-  deleteTrip: (id) => set((s) => ({ trips: s.trips.filter((x) => x.id !== id) })),
   addMaintenanceLog: (m) => set((s) => {
     const newLog = { ...m, id: `ML-${String(s.maintenanceLogs.length + 1).padStart(3, '0')}` };
     return {
@@ -365,6 +349,5 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   addExpense: (e) => set((s) => ({ expenses: [...s.expenses, { ...e, id: `EX-${String(s.expenses.length + 1).padStart(3, '0')}` }] })),
   addDriver: (d) => set((s) => ({ drivers: [...s.drivers, { ...d, id: uid() }] })),
   updateDriver: (id, d) => set((s) => ({ drivers: s.drivers.map((x) => x.id === id ? { ...x, ...d } : x) })),
-  deleteDriver: (id) => set((s) => ({ drivers: s.drivers.filter((x) => x.id !== id) })),
   isLicenseExpired: (date: string) => new Date(date) < new Date(),
 }));

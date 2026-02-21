@@ -102,44 +102,6 @@ export default {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
-        "slide-in-right": {
-          "0%": { opacity: "0", transform: "translateX(20px)" },
-          "100%": { opacity: "1", transform: "translateX(0)" },
-        },
-        "slide-up": {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        "pulse-glow": {
-          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px rgba(199, 210, 254, 0.3)" },
-          "50%": { opacity: "0.8", boxShadow: "0 0 30px rgba(199, 210, 254, 0.5)" },
-        },
-        "bounce-in": {
-          "0%": { opacity: "0", transform: "scale(0.3)" },
-          "50%": { opacity: "1", transform: "scale(1.05)" },
-          "100%": { opacity: "1", transform: "scale(1)" },
-        },
-        "flip-in": {
-          "0%": { opacity: "0", transform: "rotateY(90deg)" },
-          "100%": { opacity: "1", transform: "rotateY(0)" },
-        },
-        "shimmer-text": {
-          "0%": { backgroundPosition: "-1000px 0" },
-          "100%": { backgroundPosition: "1000px 0" },
-        },
-        "float": {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        "draw-chart": {
-          "0%": { strokeDashoffset: "1000" },
-          "100%": { strokeDashoffset: "0" },
-        },
-        "color-shift": {
-          "0%": { color: "hsl(199 89% 48%)" },
-          "50%": { color: "hsl(210 78% 56%)" },
-          "100%": { color: "hsl(199 89% 48%)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -149,15 +111,6 @@ export default {
         "scale-in": "scale-in 0.3s ease-out forwards",
         "count-up": "count-up 0.6s ease-out forwards",
         shimmer: "shimmer 2s linear infinite",
-        "slide-in-right": "slide-in-right 0.4s ease-out forwards",
-        "slide-up": "slide-up 0.5s ease-out forwards",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
-        "bounce-in": "bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-        "flip-in": "flip-in 0.6s ease-out forwards",
-        "shimmer-text": "shimmer-text 2s linear infinite",
-        "float": "float 3s ease-in-out infinite",
-        "draw-chart": "draw-chart 2s ease-out forwards",
-        "color-shift": "color-shift 3s ease-in-out infinite",
       },
     },
   },
