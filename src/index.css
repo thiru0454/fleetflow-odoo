@@ -146,4 +146,108 @@
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg;
   }
+
+  /* Skeleton Loader - similar to LinkedIn */
+  .skeleton {
+    @apply bg-gradient-to-r from-secondary via-secondary/50 to-secondary;
+    background-size: 200% 100%;
+    animation: shimmer-text 2s infinite;
+  }
+
+  .skeleton-line {
+    @apply skeleton rounded h-4 mb-3;
+  }
+
+  .skeleton-card {
+    @apply glass-card p-6;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton rounded-full w-12 h-12;
+  }
+
+  /* Pulsing effect for loading states */
+  .pulse-dot {
+    @apply w-2 h-2 rounded-full bg-primary animate-pulse;
+  }
+
+  /* Glow effect */
+  .glow-primary {
+    @apply drop-shadow-[0_0_15px_rgba(199, 210, 254, 0.3)];
+  }
+
+  .glow-primary:hover {
+    @apply drop-shadow-[0_0_25px_rgba(199, 210, 254, 0.5)];
+  }
+
+  /* Smooth transitions */
+  .smooth-transition {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Stagger animation helper */
+  .stagger-1 {
+    animation-delay: 0ms;
+  }
+
+  .stagger-2 {
+    animation-delay: 50ms;
+  }
+
+  .stagger-3 {
+    animation-delay: 100ms;
+  }
+
+  .stagger-4 {
+    animation-delay: 150ms;
+  }
+
+  .stagger-5 {
+    animation-delay: 200ms;
+  }
+
+  .stagger-6 {
+    animation-delay: 250ms;
+  }
+
+  .stagger-7 {
+    animation-delay: 300ms;
+  }
+
+  .stagger-8 {
+    animation-delay: 350ms;
+  }
+
+  .stagger-9 {
+    animation-delay: 400ms;
+  }
+
+  .stagger-10 {
+    animation-delay: 450ms;
+  }
+
+  /* Floating elements */
+  .float-animation {
+    @apply animate-float;
+  }
+
+  /* Color shifting text */
+  .color-shift-text {
+    @apply animate-color-shift bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+  }
+
+  /* Bounce animation for buttons */
+  .bounce-button:hover {
+    @apply animate-bounce;
+  }
+
+  /* Slide in animations */
+  .slide-in-bottom {
+    @apply animate-slide-up;
+  }
+
+  /* Smooth appear effect */
+  .appear-smooth {
+    @apply opacity-0 animate-fade-in;
+  }
 }

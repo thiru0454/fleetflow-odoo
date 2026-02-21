@@ -125,14 +125,14 @@ export default function MaintenancePage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Log ID</th>
-                <th>Vehicle</th>
-                <th>Issue/Service</th>
-                <th>Date</th>
-                <th>Cost</th>
-                <th>Log Status</th>
-                <th>Vehicle Status</th>
-                <th>Actions</th>
+                <th className="align-left">Log ID</th>
+                <th className="align-left">Vehicle</th>
+                <th className="align-left">Issue/Service</th>
+                <th className="align-left">Date</th>
+                <th className="align-right">Cost</th>
+                <th className="align-center">Log Status</th>
+                <th className="align-center">Vehicle Status</th>
+                <th className="align-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -148,34 +148,34 @@ export default function MaintenancePage() {
                     )}
                     style={{ animationDelay: `${i * 50}ms` }}
                   >
-                    <td className="font-mono font-medium">{m.id}</td>
-                    <td>
+                    <td className="align-left font-mono font-medium">{m.id}</td>
+                    <td className="align-left">
                       <div>
                         <p className="font-medium">{vehicle?.model || '—'}</p>
                         <p className="text-xs text-muted-foreground">{vehicle?.licensePlate}</p>
                       </div>
                     </td>
-                    <td className="max-w-xs">
+                    <td className="align-left max-w-xs">
                       <p className="font-medium text-sm">{m.issue}</p>
                     </td>
-                    <td className="text-muted-foreground">{m.date}</td>
-                    <td className="font-medium text-primary">${m.cost.toLocaleString()}</td>
-                    <td>
+                    <td className="align-left text-muted-foreground">{m.date}</td>
+                    <td className="align-right font-medium text-primary">${m.cost.toLocaleString()}</td>
+                    <td className="align-center">
                       <StatusBadge status={m.status} />
                     </td>
-                    <td>
+                    <td className="align-center">
                       <StatusBadge status={vehicle?.status || 'Available'} />
                     </td>
-                    <td>
+                    <td className="align-center">
                       {m.status !== 'Completed' && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleStatusUpdate(m.id, m.status)}
                           disabled={isLoading}
-                          className="text-xs text-primary hover:bg-primary/10 disabled:opacity-50"
+                          className="text-xs text-primary hover:bg-primary/20 hover:scale-110 transition-all duration-200"
                         >
-                          {isLoading ? '...' : m.status === 'New' ? 'Start Service' : 'Mark Completed'}
+                          {isLoading ? '...' : m.status === 'New' ? 'Start' : 'Finish'}
                         </Button>
                       )}
                       {m.status === 'Completed' && (
