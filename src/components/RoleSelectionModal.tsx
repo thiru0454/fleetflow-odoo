@@ -17,7 +17,7 @@ const roles: { value: UserRole; label: string; desc: string }[] = [
 
 export function RoleSelectionModal() {
   const navigate = useNavigate();
-  const { needsRoleSelection, updateRoleInSupabase } = useAuthStore();
+  const { needsRoleSelection, setNeedsRoleSelection, updateRoleInSupabase } = useAuthStore();
   const [role, setRole] = useState<UserRole>('fleet_manager');
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -27,6 +27,8 @@ export function RoleSelectionModal() {
     try {
       await updateRoleInSupabase(role);
       toast({ title: 'Role set successfully! Redirecting to dashboard...' });
+      // First close the modal
+      setNeedsRoleSelection(false);
       // Small delay to let the toast show before redirecting
       setTimeout(() => {
         navigate('/dashboard');
@@ -38,8 +40,8 @@ export function RoleSelectionModal() {
   };
 
   return (
-    <Dialog open={needsRoleSelection}>
-      <DialogContent className="sm:max-w-md backdrop-blur-xl bg-background/80 border-primary/30 shadow-2xl shadow-primary/20 animate-scale-in" onInteractOutside={(e) => e.preventDefault()}>
+    <Dialog open={needsRoleSelection} onOpenChange={setNeedsRoleSelection}>
+      <DialogContent className="sm:max-w-md backdrop-blur-xl bg-background/80 border-primary/30 shadow-2xl shadow-primary/20 animate-scale-in" onInteractOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader className="animate-fade-in">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="p-2 bg-gradient-to-br from-primary to-primary/70 rounded-lg shadow-lg animate-pulse">

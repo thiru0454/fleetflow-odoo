@@ -72,6 +72,7 @@ interface AuthState {
   loading: boolean;
   needsRoleSelection: boolean;
   setSession: (session: Session | null) => void;
+  setNeedsRoleSelection: (needs: boolean) => void;
   setRole: (role: UserRole) => void;
   updateRoleInSupabase: (role: UserRole) => Promise<void>;
   login: (email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
@@ -179,6 +180,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         needsRoleSelection: false,
       });
     }
+  },
+
+  setNeedsRoleSelection: (needs) => {
+    set({ needsRoleSelection: needs });
   },
 
   setRole: (role) => {
