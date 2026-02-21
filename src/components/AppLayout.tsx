@@ -36,8 +36,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
     user ? item.roles.includes(user.role) : false
   );
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
