@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, AlertTriangle, CheckCircle, Navigation, MapPin, Package, Clock, Activity, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useFleetStore, TripStatus } from '@/store/useStore';
 import { StatusBadge } from '@/components/StatusBadge';
 import { FilterBar } from '@/components/FilterBar';
@@ -10,6 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function TripsPage() {
   const { trips, vehicles, drivers, addTrip, updateTrip, isLicenseExpired } = useFleetStore();
@@ -89,234 +92,213 @@ export default function TripsPage() {
       date: new Date().toISOString().split('T')[0],
       region: vehicle?.region || '',
     });
-    toast({ title: '✓ Trip created successfully', variant: 'default' });
+    toast({ title: '✓ Mission Vector Locked', description: 'Logistics packet generated and queued.' });
     setModalOpen(false);
   };
 
   const handleDispatch = (id: string) => {
-    const trip = trips.find(t => t.id === id);
-    const driver = trip ? drivers.find(d => d.id === trip.driverId) : null;
-
-    if (driver && isLicenseExpired(driver.licenseExpiry)) {
-      toast({ title: 'Cannot dispatch: driver license expired', variant: 'destructive' });
-      return;
-    }
-
     setDispatchingId(id);
     setTimeout(() => {
       updateTrip(id, { status: 'Dispatched' });
-      toast({ title: '🚀 Trip dispatched successfully', description: 'Vehicle & driver status updated to On Trip' });
+      toast({ title: '🚀 DISPATCH ACTIVE', description: 'Live tracking stream established.' });
       setDispatchingId(null);
-    }, 500);
+    }, 800);
   };
 
   const handleComplete = (id: string) => {
     setDispatchingId(id);
     setTimeout(() => {
       updateTrip(id, { status: 'Completed' });
-      toast({ title: '✅ Trip completed', description: 'Vehicle & driver returned to available status' });
+      toast({ title: '✅ ARCHIVAL SUCCESS', description: 'Mission data migrated to historical logs.' });
       setDispatchingId(null);
-    }, 500);
-  };
-
-  const handleCancel = (id: string) => {
-    updateTrip(id, { status: 'Cancelled' });
-    toast({ title: 'Trip cancelled', variant: 'destructive' });
+    }, 800);
   };
 
   const getVehicle = (id: string) => vehicles.find((v) => v.id === id);
   const getDriver = (id: string) => drivers.find((d) => d.id === id);
 
   const filtered = trips.filter((t) => {
-    const matchSearch = !search || t.id.toLowerCase().includes(search.toLowerCase()) || t.origin.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search || t.id.toLowerCase().includes(search.toLowerCase()) || t.origin.toLowerCase().includes(search.toLowerCase()) || t.destination.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || t.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in">
         <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Trip Dispatcher</h2>
-          <p className="text-sm text-muted-foreground">Manage and dispatch fleet trips with real-time status tracking</p>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent tracking-tight">Mission Dispatch</h2>
+          <p className="text-sm text-muted-foreground mt-1">Real-time vector tracking and cargo orchestration</p>
         </div>
-        <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/50 hover:scale-105 shadow-md transition-all duration-300 group">
-          <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" /> New Trip
+        <Button onClick={openCreate} className="bg-primary text-primary-foreground hover:shadow-xl transition-all font-black uppercase tracking-tighter h-11 px-8">
+          <Plus className="h-5 w-5 mr-1" /> Initialize Trip
         </Button>
       </div>
 
       <FilterBar
         searchValue={search}
         onSearch={setSearch}
-        searchPlaceholder="Search trips by ID or location..."
+        searchPlaceholder="Analyze mission IDs, locations, or status..."
         filters={[{
-          label: 'Status', value: statusFilter, onChange: setStatusFilter,
-          options: (['Draft', 'Dispatched', 'Completed', 'Cancelled'] as TripStatus[]).map((s) => ({ label: s, value: s })),
+          label: 'Lifecycle', value: statusFilter, onChange: setStatusFilter,
+          options: [{ label: 'All Lifecycle', value: 'all' }, { label: 'Drafting', value: 'Draft' }, { label: 'In Transit', value: 'Dispatched' }, { label: 'Completed', value: 'Completed' }, { label: 'Aborted', value: 'Cancelled' }],
         }]}
       />
 
-      <div className="glass-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead>
-              <tr><th className="align-left">Trip ID</th><th className="align-left">Vehicle</th><th className="align-left">Driver</th><th className="align-left">Origin</th><th className="align-left">Destination</th><th className="align-right">Cargo (kg)</th><th className="align-center">Status</th><th className="align-center">Actions</th></tr>
-            </thead>
-            <tbody>
-              {filtered.map((t, i) => {
-                const vehicle = getVehicle(t.vehicleId);
-                const driver = getDriver(t.driverId);
-                const isLoading = dispatchingId === t.id;
-                return (
-                  <tr key={t.id} className="opacity-0 animate-fade-in hover:bg-secondary/50 transition-colors" style={{ animationDelay: `${i * 50}ms` }}>
-                    <td className="align-left font-medium text-primary">{t.id}</td>
-                    <td className="align-left">
-                      <div className="flex items-center gap-2">
-                        <span>{vehicle?.model || '—'}</span>
-                        <StatusBadge status={vehicle?.status || 'Available'} />
-                      </div>
-                    </td>
-                    <td className="align-left">
-                      <div className="flex items-center gap-2">
-                        <span>{driver?.name || '—'}</span>
-                        {driver && isLicenseExpired(driver.licenseExpiry) && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
-                      </div>
-                    </td>
-                    <td className="align-left text-muted-foreground">{t.origin}</td>
-                    <td className="align-left text-muted-foreground">{t.destination}</td>
-                    <td className="align-right font-medium">{t.cargoWeight.toLocaleString()}</td>
-                    <td className="align-center"><StatusBadge status={t.status} /></td>
-                    <td className="align-center">
-                      <div className="cell-actions gap-1">
-                        {t.status === 'Draft' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDispatch(t.id)}
-                              disabled={isLoading}
-                              title="Dispatch Trip"
-                              className="h-8 w-8 text-primary hover:bg-primary/20 hover:scale-110 transition-all duration-200"
-                            >
-                              {isLoading ? '...' : <Plus className="h-4 w-4" />}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCancel(t.id)}
-                              title="Cancel Trip"
-                              className="h-8 w-8 text-destructive hover:bg-destructive/20 hover:scale-110 transition-all duration-200"
-                            >
-                              <AlertTriangle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        {t.status === 'Dispatched' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleComplete(t.id)}
-                            disabled={isLoading}
-                            title="Complete Trip"
-                            className="h-8 w-8 text-status-available hover:bg-status-available/20 hover:scale-110 transition-all duration-200"
-                          >
-                            {isLoading ? '...' : <CheckCircle className="h-4 w-4" />}
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground">No trips found</div>
-          )}
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+        {filtered.map((t, i) => {
+          const vehicle = getVehicle(t.vehicleId);
+          const driver = getDriver(t.driverId);
+          const isLoading = dispatchingId === t.id;
+
+          return (
+            <Card key={t.id} className={cn(
+              "glass-card p-6 hover:border-primary/40 transition-all group overflow-hidden relative",
+              t.status === 'Dispatched' && "bg-gradient-to-br from-status-on-trip/5 to-transparent border-status-on-trip/30"
+            )}>
+              {t.status === 'Dispatched' && (
+                <div className="absolute top-0 right-0 p-1 bg-status-on-trip text-slate-900 text-[10px] font-black uppercase flex items-center gap-1 px-3 rounded-bl-xl shadow-lg animate-pulse">
+                  <Zap className="h-3 w-3 fill-current" /> Live Signal Active
+                </div>
+              )}
+
+              <div className="flex flex-col h-full space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <Badge variant="outline" className="text-[10px] font-black tracking-widest text-primary border-primary/20 mb-2 uppercase">{t.id}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Navigation className="h-4 w-4 text-primary" />
+                      <h3 className="font-black text-lg uppercase tracking-tight">{t.origin} <ArrowRight className="h-4 w-4 inline text-muted-foreground mx-1" /> {t.destination}</h3>
+                    </div>
+                  </div>
+                  <StatusBadge status={t.status} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
+                    <div className="h-8 w-8 rounded-lg bg-background flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
+                      <Truck className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black uppercase text-muted-foreground">Asset</p>
+                      <p className="text-xs font-bold truncate max-w-[100px]">{vehicle?.model || 'UNSPECIFIED'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/50">
+                    <div className="h-8 w-8 rounded-lg bg-background flex items-center justify-center text-status-available shadow-sm">
+                      <UserCheck className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black uppercase text-muted-foreground">Operator</p>
+                      <p className="text-xs font-bold truncate max-w-[100px]">{driver?.name || 'UNSPECIFIED'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Package className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-tighter">{t.cargoWeight.toLocaleString()} KG</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-tighter">{t.date}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {t.status === 'Draft' && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleDispatch(t.id)}
+                        disabled={isLoading}
+                        className="bg-primary hover:bg-primary/90 font-black uppercase tracking-tighter text-[10px] h-8 shadow-md"
+                      >
+                        {isLoading ? 'SYNCING...' : 'Dispatch Vector'}
+                      </Button>
+                    )}
+                    {t.status === 'Dispatched' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleComplete(t.id)}
+                        disabled={isLoading}
+                        className="border-status-available text-status-available hover:bg-status-available/10 font-black uppercase tracking-tighter text-[10px] h-8"
+                      >
+                        {isLoading ? 'ARCHIVING...' : 'Archive Mission'}
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/20">
+                      <Activity className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+
+        {filtered.length === 0 && (
+          <div className="col-span-full p-20 text-center glass-card border-dashed">
+            <Navigation className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-30" />
+            <p className="text-muted-foreground font-black uppercase tracking-widest text-xs opacity-50">No mission clusters detected in current search sector</p>
+          </div>
+        )}
       </div>
 
-      <ModalForm open={modalOpen} onClose={() => setModalOpen(false)} title="Create New Trip">
+      <ModalForm open={modalOpen} onClose={() => setModalOpen(false)} title="Initialize Mission Vector">
         <div className="space-y-4">
-          {cargoError && (
-            <Alert className="border-destructive/50 bg-destructive/10">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-destructive">{cargoError}</AlertDescription>
-            </Alert>
-          )}
-          {licenseError && (
-            <Alert className="border-destructive/50 bg-destructive/10">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-destructive">{licenseError}</AlertDescription>
-            </Alert>
-          )}
-          <div>
-            <Label>Vehicle (Available) *</Label>
-            <Select value={form.vehicleId} onValueChange={handleVehicleChange}>
-              <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue placeholder="Select vehicle" /></SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {availableVehicles.length === 0 ? (
-                  <div className="p-2 text-sm text-muted-foreground">No available vehicles</div>
-                ) : (
-                  availableVehicles.map((v) => (
-                    <SelectItem key={v.id} value={v.id}>
-                      {v.model} — {v.licensePlate} (Capacity: {v.capacity}kg)
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Driver (On Duty &amp; Valid License) *</Label>
-            <Select value={form.driverId} onValueChange={handleDriverChange}>
-              <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue placeholder="Select driver" /></SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                {availableDrivers.length === 0 ? (
-                  <div className="p-2 text-sm text-muted-foreground">No drivers available with valid license</div>
-                ) : (
-                  availableDrivers.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.name} (Safety: {d.safetyScore}%)
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Cargo Weight (kg) *</Label>
-            <Input
-              type="number"
-              value={form.cargoWeight}
-              onChange={(e) => handleCargoChange(e.target.value)}
-              className={`mt-1.5 bg-secondary border-border ${cargoError ? 'border-destructive' : ''}`}
-              placeholder="0"
-            />
-            {form.vehicleId && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Max capacity: {getVehicle(form.vehicleId)?.capacity || '—'}kg
-              </p>
-            )}
-          </div>
+          {cargoError && <Alert className="border-destructive/50 bg-destructive/5 text-destructive py-2"><AlertTriangle className="h-4 w-4" /><AlertDescription className="text-[10px] font-black uppercase">{cargoError}</AlertDescription></Alert>}
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Origin Address *</Label>
-              <Input value={form.origin} onChange={(e) => setForm({ ...form, origin: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="City, State" />
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Origin Hub</Label>
+              <Input value={form.origin} onChange={(e) => setForm({ ...form, origin: e.target.value })} className="mt-1" placeholder="City, State" />
             </div>
             <div>
-              <Label>Destination Address *</Label>
-              <Input value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="City, State" />
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Destination Hub</Label>
+              <Input value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className="mt-1" placeholder="City, State" />
             </div>
           </div>
-          <div>
-            <Label>Estimated Fuel Cost ($)</Label>
-            <Input type="number" value={form.estimatedFuelCost} onChange={(e) => setForm({ ...form, estimatedFuelCost: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" placeholder="0" />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Available Asset</Label>
+              <Select value={form.vehicleId} onValueChange={handleVehicleChange}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+                <SelectContent>
+                  {availableVehicles.map((v) => <SelectItem key={v.id} value={v.id}>{v.model} ({v.licensePlate})</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Personnel Assignment</Label>
+              <Select value={form.driverId} onValueChange={handleDriverChange}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select driver" /></SelectTrigger>
+                <SelectContent>
+                  {availableDrivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.name} (Safety: {d.safetyScore}%)</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Payload Weight (KG)</Label>
+              <Input type="number" value={form.cargoWeight} onChange={(e) => handleCargoChange(e.target.value)} className="mt-1" placeholder="0" />
+            </div>
+            <div>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Est. Operational Cost ($)</Label>
+              <Input type="number" value={form.estimatedFuelCost} onChange={(e) => setForm({ ...form, estimatedFuelCost: Number(e.target.value) })} className="mt-1" placeholder="0" />
+            </div>
+          </div>
+
           <div className="flex gap-3 pt-4">
-            <Button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
-              <CheckCircle className="h-4 w-4 mr-2" />Confirm &amp; Create Trip
+            <Button onClick={handleSave} className="flex-1 font-black uppercase tracking-tighter shadow-lg shadow-primary/20">
+              Initialize & Vector Lock
             </Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)} className="border-border hover:bg-secondary">Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
           </div>
         </div>
       </ModalForm>

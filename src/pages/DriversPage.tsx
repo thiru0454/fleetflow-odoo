@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, AlertTriangle, History, X, MapPin, Calendar, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, History, X, MapPin, Calendar, Package, Award, ShieldCheck, TrendingUp, Star, Search, UserCheck } from 'lucide-react';
 import { useFleetStore, Driver, DriverStatus } from '@/store/useStore';
 import { StatusBadge } from '@/components/StatusBadge';
 import { FilterBar } from '@/components/FilterBar';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export default function DriversPage() {
@@ -68,14 +69,14 @@ export default function DriversPage() {
     }
     if (editing) {
       updateDriver(editing.id, form);
-      toast({ title: '✓ Driver updated successfully', description: `${form.name} profile saved` });
+      toast({ title: '✓ Driver Lifecycle Updated', description: `${form.name}'s profile re-qualified.` });
     } else {
       if (drivers.some((d) => d.licenseNumber === form.licenseNumber)) {
         toast({ title: 'License number must be unique', variant: 'destructive' });
         return;
       }
       addDriver(form);
-      toast({ title: '✓ Driver added successfully', description: `${form.name} added to fleet` });
+      toast({ title: '✓ New Personnel Registered', description: `${form.name} cleared for duty.` });
     }
     setModalOpen(false);
   };
@@ -108,6 +109,8 @@ export default function DriversPage() {
     return matchSearch && matchStatus;
   });
 
+  const topPerformer = [...drivers].sort((a, b) => b.safetyScore - a.safetyScore)[0];
+
   const tripStatusColor: Record<string, string> = {
     Completed: 'bg-green-500/20 text-green-400 border-green-500/30',
     Dispatched: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
@@ -118,14 +121,19 @@ export default function DriversPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in">
         <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Driver Performance & Safety</h2>
-          <p className="text-sm text-muted-foreground">Monitor driver compliance, safety scores, and performance metrics</p>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent tracking-tight">Personnel Center</h2>
+          <p className="text-sm text-muted-foreground mt-1 font-medium">Monitoring safety compliance and performance for {drivers.length} operators</p>
         </div>
-        <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/50 hover:scale-105 shadow-md transition-all duration-300 group">
-          <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" /> Add Driver
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="border-primary/20 hover:bg-primary/5 transition-all text-xs font-black uppercase tracking-tighter h-11">
+            <TrendingUp className="h-4 w-4 mr-2" /> Training Hub
+          </Button>
+          <Button onClick={openCreate} className="px-6 h-11 shadow-lg hover:shadow-primary/30 transition-all font-black uppercase tracking-tighter">
+            <Plus className="h-5 w-5 mr-1" /> Register Driver
+          </Button>
+        </div>
       </div>
 
       {/* Stats Bar */}
@@ -142,22 +150,48 @@ export default function DriversPage() {
         ))}
       </div>
 
+      {/* Top Performer Spotlight */}
+      {topPerformer && (
+        <Card className="p-1 overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/10 to-transparent animate-shimmer" />
+          <div className="p-4 flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-xl ring-4 ring-primary/10">
+                <Award className="h-7 w-7" />
+              </div>
+              <div>
+                <Badge variant="secondary" className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary mb-1">Elite Operator Tier</Badge>
+                <h3 className="font-black text-xl uppercase tracking-tighter">{topPerformer.name}</h3>
+              </div>
+            </div>
+            <div className="text-right hidden sm:block">
+              <div className="flex items-center gap-1 justify-end text-yellow-500 mb-1">
+                {[1, 2, 3, 4, 5].map(s => <Star key={s} className="h-3 w-3 fill-current" />)}
+              </div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">Safety Score: {topPerformer.safetyScore}%</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <FilterBar
         searchValue={search}
         onSearch={setSearch}
-        searchPlaceholder="Search by name or license number..."
+        searchPlaceholder="Search active personnel, CDL refs, or tags..."
         filters={[{
-          label: 'Status',
+          label: 'Ops Status',
           value: statusFilter,
           onChange: setStatusFilter,
           options: [
-            { label: 'On Duty', value: 'On Duty' },
-            { label: 'Off Duty', value: 'Off Duty' },
-            { label: 'Suspended', value: 'Suspended' },
+            { label: 'All Personal', value: 'all' },
+            { label: 'Active Duty', value: 'On Duty' },
+            { label: 'Off Cycle', value: 'Off Duty' },
+            { label: 'Compliance Hold', value: 'Suspended' },
           ],
         }]}
       />
 
+      {/* Driver Table */}
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="data-table">
@@ -274,7 +308,10 @@ export default function DriversPage() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground">No drivers found</div>
+            <div className="p-8 text-center text-muted-foreground">
+              <Search className="h-10 w-10 mx-auto mb-3 opacity-20" />
+              <p className="font-black uppercase tracking-widest text-xs opacity-50">No personnel matching current filters</p>
+            </div>
           )}
         </div>
       </div>
@@ -283,30 +320,20 @@ export default function DriversPage() {
       <ModalForm open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Driver' : 'Add New Driver'}>
         <div className="space-y-4">
           <div>
-            <Label>Full Name *</Label>
-            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1.5 bg-secondary border-border" placeholder="John Smith" />
-          </div>
-          <div>
-            <Label>License Number *</Label>
-            <Input value={form.licenseNumber} onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })} className="mt-1.5 bg-secondary border-border font-mono" placeholder="CDL-88421" disabled={!!editing} />
+            <Label className="text-[10px] font-black uppercase text-muted-foreground">Operator Full Name</Label>
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1" placeholder="Marcus Johnson" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>License Expiry *</Label>
-              <Input type="date" value={form.licenseExpiry} onChange={(e) => setForm({ ...form, licenseExpiry: e.target.value })} className="mt-1.5 bg-secondary border-border" />
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">CDL / License Ref</Label>
+              <Input value={form.licenseNumber} onChange={(e) => setForm({ ...form, licenseNumber: e.target.value.toUpperCase() })} className="mt-1 font-mono uppercase" placeholder="CDL-XXXXX" disabled={!!editing} />
             </div>
             <div>
-              <Label>Status *</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as DriverStatus })}>
-                <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="On Duty">On Duty</SelectItem>
-                  <SelectItem value="Off Duty">Off Duty</SelectItem>
-                  <SelectItem value="Suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-[10px] font-black uppercase text-muted-foreground">Registry Expiration</Label>
+              <Input type="date" value={form.licenseExpiry} onChange={(e) => setForm({ ...form, licenseExpiry: e.target.value })} className="mt-1" />
             </div>
           </div>
+
           <div className="space-y-3">
             {[
               { label: 'Safety Score (%)', key: 'safetyScore' as const, max: 100 },
@@ -314,7 +341,7 @@ export default function DriversPage() {
             ].map(({ label, key, max }) => (
               <div key={key}>
                 <div className="flex items-center justify-between mb-2">
-                  <Label>{label}</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground">{label}</Label>
                   <span className={cn('text-sm font-medium',
                     key === 'safetyScore'
                       ? form.safetyScore >= 90 ? 'text-status-available' : form.safetyScore >= 75 ? 'text-status-on-trip' : 'text-destructive'
@@ -329,11 +356,24 @@ export default function DriversPage() {
               </div>
             ))}
           </div>
+
+          <div>
+            <Label className="text-[10px] font-black uppercase text-muted-foreground">Operations Status</Label>
+            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as DriverStatus })}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="On Duty">On Duty</SelectItem>
+                <SelectItem value="Off Duty">Off Duty</SelectItem>
+                <SelectItem value="Suspended">Suspended</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex gap-3 pt-4">
-            <Button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
-              {editing ? 'Save Changes' : 'Add Driver'}
+            <Button onClick={handleSave} className="flex-1 font-black uppercase tracking-tighter">
+              {editing ? 'Update File' : 'Authorize Personnel'}
             </Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)} className="border-border hover:bg-secondary">Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
           </div>
         </div>
       </ModalForm>
@@ -369,7 +409,6 @@ export default function DriversPage() {
           {historyDriver && (() => {
             const driverTrips = getDriverTrips(historyDriver.id);
             const realRate = getRealCompletionRate(historyDriver.id);
-            const completedTrips = driverTrips.filter(t => t.status === 'Completed');
             const totalCargo = driverTrips.reduce((a, t) => a + t.cargoWeight, 0);
 
             return (
