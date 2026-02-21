@@ -17,7 +17,6 @@ export interface Vehicle {
   capacity: number;
   odometer: number;
   status: VehicleStatus;
-  region: string;
 }
 
 export interface Driver {
@@ -42,7 +41,6 @@ export interface Trip {
   estimatedFuelCost: number;
   status: TripStatus;
   date: string;
-  region: string;
 }
 
 export interface MaintenanceLog {
@@ -106,18 +104,11 @@ interface FleetState {
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const sampleVehicles: Vehicle[] = [
-  { id: 'v1', licensePlate: 'ABC-1234', model: 'Volvo FH16', type: 'Truck', capacity: 25000, odometer: 120450, status: 'Available', region: 'North' },
-  { id: 'v2', licensePlate: 'DEF-5678', model: 'Mercedes Actros', type: 'Truck', capacity: 22000, odometer: 89200, status: 'On Trip', region: 'South' },
-  { id: 'v3', licensePlate: 'GHI-9012', model: 'Ford Transit', type: 'Van', capacity: 3500, odometer: 45600, status: 'Available', region: 'East' },
-  { id: 'v4', licensePlate: 'JKL-3456', model: 'Scania R500', type: 'Truck', capacity: 28000, odometer: 200100, status: 'In Shop', region: 'West' },
-  { id: 'v5', licensePlate: 'MNO-7890', model: 'Honda Super Cub', type: 'Bike', capacity: 150, odometer: 12300, status: 'Available', region: 'North' },
-  { id: 'v6', licensePlate: 'PQR-1122', model: 'Freightliner Cascadia', type: 'Truck', capacity: 30000, odometer: 15000, status: 'On Trip', region: 'West' },
-  { id: 'v7', licensePlate: 'STU-3344', model: 'Toyota HiAce', type: 'Van', capacity: 4000, odometer: 32000, status: 'Available', region: 'South' },
-  { id: 'v8', licensePlate: 'VWX-5566', model: 'Yamaha MT-07', type: 'Bike', capacity: 200, odometer: 5000, status: 'Available', region: 'East' },
-  { id: 'v9', licensePlate: 'YZA-7788', model: 'Peterbilt 579', type: 'Truck', capacity: 26000, odometer: 210000, status: 'In Shop', region: 'North' },
-  { id: 'v10', licensePlate: 'BCD-9900', model: 'Volkswagen Crafter', type: 'Van', capacity: 5000, odometer: 88000, status: 'On Trip', region: 'West' },
-  { id: 'v11', licensePlate: 'EFG-1133', model: 'Kenworth T680', type: 'Truck', capacity: 27000, odometer: 95000, status: 'On Trip', region: 'East' },
-  { id: 'v12', licensePlate: 'HIJ-2244', model: 'Ducati Scrambler', type: 'Bike', capacity: 180, odometer: 2500, status: 'Available', region: 'South' },
+  { id: 'v1', licensePlate: 'ABC-1234', model: 'Volvo FH16', type: 'Heavy Truck', capacity: 25000, odometer: 120450, status: 'Available' },
+  { id: 'v2', licensePlate: 'DEF-5678', model: 'Mercedes Actros', type: 'Heavy Truck', capacity: 22000, odometer: 89200, status: 'On Trip' },
+  { id: 'v3', licensePlate: 'GHI-9012', model: 'Ford Transit', type: 'Van', capacity: 3500, odometer: 45600, status: 'Available' },
+  { id: 'v4', licensePlate: 'JKL-3456', model: 'Scania R500', type: 'Heavy Truck', capacity: 28000, odometer: 200100, status: 'In Shop' },
+  { id: 'v5', licensePlate: 'MNO-7890', model: 'Isuzu NPR', type: 'Medium Truck', capacity: 8000, odometer: 67300, status: 'Available' },
 ];
 
 const sampleDrivers: Driver[] = [
@@ -128,10 +119,9 @@ const sampleDrivers: Driver[] = [
 ];
 
 const sampleTrips: Trip[] = [
-  { id: 'TR-001', vehicleId: 'v2', driverId: 'd1', vehicleType: 'Truck', origin: 'Chicago, IL', destination: 'Detroit, MI', cargoWeight: 18000, estimatedFuelCost: 450, status: 'Dispatched', date: '2026-02-20', region: 'South' },
-  { id: 'TR-002', vehicleId: 'v1', driverId: 'd2', vehicleType: 'Truck', origin: 'Dallas, TX', destination: 'Houston, TX', cargoWeight: 12000, estimatedFuelCost: 280, status: 'Completed', date: '2026-02-18', region: 'North' },
-  { id: 'TR-003', vehicleId: 'v3', driverId: 'd4', vehicleType: 'Van', origin: 'NYC, NY', destination: 'Boston, MA', cargoWeight: 2800, estimatedFuelCost: 120, status: 'Draft', date: '2026-02-21', region: 'East' },
-  { id: 'TR-004', vehicleId: 'v6', driverId: 'd2', vehicleType: 'Truck', origin: 'Los Angeles, CA', destination: 'Phoenix, AZ', cargoWeight: 25000, estimatedFuelCost: 600, status: 'Dispatched', date: '2026-02-21', region: 'West' },
+  { id: 'TR-001', vehicleId: 'v2', driverId: 'd1', vehicleType: 'Heavy Truck', origin: 'Chicago, IL', destination: 'Detroit, MI', cargoWeight: 18000, estimatedFuelCost: 450, status: 'Dispatched', date: '2026-02-20' },
+  { id: 'TR-002', vehicleId: 'v1', driverId: 'd2', vehicleType: 'Heavy Truck', origin: 'Dallas, TX', destination: 'Houston, TX', cargoWeight: 12000, estimatedFuelCost: 280, status: 'Completed', date: '2026-02-18' },
+  { id: 'TR-003', vehicleId: 'v3', driverId: 'd4', vehicleType: 'Van', origin: 'NYC, NY', destination: 'Boston, MA', cargoWeight: 2800, estimatedFuelCost: 120, status: 'Draft', date: '2026-02-21' },
 ];
 
 const sampleMaintenance: MaintenanceLog[] = [
@@ -150,15 +140,15 @@ async function fetchUserRole(userId: string): Promise<{ role: UserRole; isNew: b
     .select('role, confirmed_by_user')
     .eq('user_id', userId)
     .single();
-
+  
   // If no role found, user is brand new
   if (!data) return { role: 'fleet_manager', isNew: true };
-
+  
   // If role exists but NOT confirmed by user, it's an auto-created role (OAuth default) - force selection
   if (data.confirmed_by_user === false || data.confirmed_by_user === null) {
     return { role: data.role as UserRole, isNew: true };
   }
-
+  
   return { role: data.role as UserRole, isNew: false };
 }
 
@@ -175,10 +165,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { role, isNew } = await fetchUserRole(session.user.id);
       const meta = session.user.user_metadata;
       const isOAuth = session.user.app_metadata?.provider === 'google';
-
+      
       // For OAuth users, force role selection if newly signed up
       const forceRoleSelection = isOAuth && isNew;
-
+      
       set({
         isAuthenticated: true,
         session,
@@ -251,7 +241,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     });
     if (error) return { error: error.message };
-
+    
     // If email confirmation is disabled, user will have an active session
     // If enabled, user will need to confirm email
     if (data.session) {
@@ -260,10 +250,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .from('user_roles')
         .insert({ user_id: data.user!.id, role, confirmed_by_user: true })
         .single();
-
+      
       await get().setSession(data.session);
     }
-
+    
     return { error: null };
   },
 
@@ -309,7 +299,7 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   updateTrip: (id, t) => set((s) => {
     const trip = s.trips.find(x => x.id === id);
     if (!trip) return { trips: s.trips };
-
+    
     const updatedTrip = { ...trip, ...t };
     let updatedVehicles = s.vehicles;
     let updatedDrivers = s.drivers;
