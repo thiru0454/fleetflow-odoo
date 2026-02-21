@@ -9,7 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
-import DashboardPage from "./pages/DashboardPage";
+import DashboardPage from "./pages/DashboardEnhancedPage";
 import VehiclesPage from "./pages/VehiclesPage";
 import TripsPage from "./pages/TripsPage";
 import MaintenancePage from "./pages/MaintenancePage";
