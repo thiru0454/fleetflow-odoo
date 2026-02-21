@@ -80,7 +80,15 @@ export default function AuthPage() {
     setSubmitting(true);
     try {
       await loginWithGoogle();
-    } finally {
+      // Note: Supabase OAuth will redirect, so this code might not execute
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Google login failed';
+      toast({
+        title: 'Google Login Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      console.error('Google OAuth error:', error);
       setSubmitting(false);
     }
   };
@@ -288,6 +296,6 @@ export default function AuthPage() {
           <p>© 2026 FleetFlow. Modular Fleet & Logistics Management System.</p>
         </div>
       </footer>
-    </div>
+   </div>
   );
 }
