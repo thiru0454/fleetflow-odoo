@@ -5,7 +5,9 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { FilterBar } from '@/components/FilterBar';
 import { ModalForm } from '@/components/ModalForm';
 import { Button } from '@/components/ui/button';
-import { VehicleForm } from '@/components/forms/VehicleForm';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
 const statuses: VehicleStatus[] = ['Available', 'On Trip', 'In Shop', 'Retired'];
@@ -18,22 +20,36 @@ export default function VehiclesPage() {
   const [editing, setEditing] = useState<Vehicle | null>(null);
   const { toast } = useToast();
 
+  const [form, setForm] = useState({
+    licensePlate: '', model: '', type: '', capacity: 0, odometer: 0, status: 'Available' as VehicleStatus,
+  });
+
   const openCreate = () => {
     setEditing(null);
+    setForm({ licensePlate: '', model: '', type: '', capacity: 0, odometer: 0, status: 'Available' });
     setModalOpen(true);
   };
 
   const openEdit = (v: Vehicle) => {
     setEditing(v);
+    setForm({ licensePlate: v.licensePlate, model: v.model, type: v.type, capacity: v.capacity, odometer: v.odometer, status: v.status });
     setModalOpen(true);
   };
 
-  const handleSave = (data: Omit<Vehicle, 'id'>) => {
+  const handleSave = () => {
+    if (!form.licensePlate || !form.model) {
+      toast({ title: 'Please fill required fields', variant: 'destructive' });
+      return;
+    }
     if (editing) {
-      updateVehicle(editing.id, data);
+      updateVehicle(editing.id, form);
       toast({ title: 'Vehicle updated' });
     } else {
-      addVehicle(data);
+      if (vehicles.some((v) => v.licensePlate === form.licensePlate)) {
+        toast({ title: 'License plate must be unique', variant: 'destructive' });
+        return;
+      }
+      addVehicle(form);
       toast({ title: 'Vehicle created' });
     }
     setModalOpen(false);
@@ -84,9 +100,9 @@ export default function VehiclesPage() {
             <tbody>
               {filtered.map((v, i) => (
                 <tr key={v.id} className="opacity-0 animate-fade-in hover:bg-primary/10 hover:scale-y-105 transition-all duration-200 group" style={{ animationDelay: `${i * 50}ms` }}>
-                  <td className="font-medium group-hover:text-primary transition-colors">{v.licensePlate}</td>
-                  <td className="group-hover:text-primary transition-colors">{v.model}</td>
-                  <td className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">{v.type}</td>
+                  <td className="align-left font-medium group-hover:text-primary transition-colors">{v.licensePlate}</td>
+                  <td className="align-left group-hover:text-primary transition-colors">{v.model}</td>
+                  <td className="align-left text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">{v.type}</td>
                   <td className="align-right group-hover:text-primary transition-colors">{v.capacity.toLocaleString()}</td>
                   <td className="align-right text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">{v.odometer.toLocaleString()} km</td>
                   <td className="align-center"><StatusBadge status={v.status} /></td>
@@ -96,22 +112,19 @@ export default function VehiclesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openEdit(v)}
-                        className="h-8 w-8 text-primary hover:bg-primary/20"
+                        title="Edit Vehicle"
+                        className="h-8 w-8 text-primary hover:bg-primary/20 hover:scale-110 transition-all duration-200"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => {
-                          if (window.confirm('Delete this vehicle?')) {
-                            deleteVehicle(v.id);
-                            toast({ title: 'Vehicle deleted' });
-                          }
-                        }}
-                        className="h-8 w-8 text-destructive hover:bg-destructive/20"
+                        onClick={() => { deleteVehicle(v.id); toast({ title: 'Vehicle deleted' }); }}
+                        title="Delete Vehicle"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/20 hover:scale-110 transition-all duration-200"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </td>
@@ -123,12 +136,45 @@ export default function VehiclesPage() {
       </div>
 
       <ModalForm open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit Vehicle' : 'Create Vehicle'}>
-        <VehicleForm
-          initialData={editing || undefined}
-          onCancel={() => setModalOpen(false)}
-          onSave={handleSave}
-          isUniquePlate={(plate) => !vehicles.some(v => v.licensePlate === plate)}
-        />
+        <div className="space-y-4">
+          <div>
+            <Label>License Plate</Label>
+            <Input value={form.licensePlate} onChange={(e) => setForm({ ...form, licensePlate: e.target.value })} className="mt-1.5 bg-secondary border-border" />
+          </div>
+          <div>
+            <Label>Model</Label>
+            <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} className="mt-1.5 bg-secondary border-border" />
+          </div>
+          <div>
+            <Label>Type</Label>
+            <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="Heavy Truck, Van, etc." className="mt-1.5 bg-secondary border-border" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Max Payload (kg)</Label>
+              <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+            </div>
+            <div>
+              <Label>Initial Odometer</Label>
+              <Input type="number" value={form.odometer} onChange={(e) => setForm({ ...form, odometer: Number(e.target.value) })} className="mt-1.5 bg-secondary border-border" />
+            </div>
+          </div>
+          <div>
+            <Label>Status</Label>
+            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as VehicleStatus })}>
+              <SelectTrigger className="mt-1.5 bg-secondary border-border"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                {statuses.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button onClick={handleSave} className="flex-1 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/50 hover:scale-105 shadow-md transition-all duration-300">
+              {editing ? 'Update' : 'Create'} Vehicle
+            </Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)} className="border-primary/30 hover:border-primary hover:bg-primary/10 transition-all">Cancel</Button>
+          </div>
+        </div>
       </ModalForm>
     </div>
   );

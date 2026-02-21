@@ -62,19 +62,19 @@ export default function ExpensesPage() {
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="data-table">
-            <thead><tr><th>Trip ID</th><th>Driver</th><th>Distance</th><th>Fuel Expense</th><th>Misc Expense</th><th>Total Op. Cost</th><th>Status</th></tr></thead>
+            <thead><tr><th className="align-left">Trip ID</th><th className="align-left">Driver</th><th className="align-right">Distance</th><th className="align-right">Fuel Expense</th><th className="align-right">Misc Expense</th><th className="align-right">Total Op. Cost</th><th className="align-center">Status</th></tr></thead>
             <tbody>
               {filtered.map((e, i) => {
                 const totalOp = e.fuelExpense + e.miscExpense;
                 return (
                   <tr key={e.id} className="opacity-0 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
-                    <td className="font-medium text-primary">{e.tripId}</td>
-                    <td>{getDriver(e.driverId)?.name || '—'}</td>
-                    <td>{e.distance} km</td>
-                    <td>${e.fuelExpense.toLocaleString()}</td>
-                    <td>${e.miscExpense.toLocaleString()}</td>
-                    <td className="font-medium">${totalOp.toLocaleString()}</td>
-                    <td><StatusBadge status={e.status} /></td>
+                    <td className="align-left font-medium text-primary">{e.tripId}</td>
+                    <td className="align-left">{getDriver(e.driverId)?.name || '—'}</td>
+                    <td className="align-right">{e.distance} km</td>
+                    <td className="align-right">${e.fuelExpense.toLocaleString()}</td>
+                    <td className="align-right">${e.miscExpense.toLocaleString()}</td>
+                    <td className="align-right font-medium">${totalOp.toLocaleString()}</td>
+                    <td className="align-center"><StatusBadge status={e.status} /></td>
                   </tr>
                 );
               })}

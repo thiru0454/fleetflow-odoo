@@ -80,7 +80,7 @@
   }
 
   .status-pill {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
   .status-available {
@@ -132,41 +132,22 @@
   }
 
   .data-table th {
-    @apply text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 border-b border-border/50;
-    vertical-align: middle;
+    @apply text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 border-b border-border/50;
   }
 
   .data-table td {
     @apply px-4 py-3.5 text-sm border-b border-border/30;
-    vertical-align: middle;
   }
 
   .data-table tbody tr {
     @apply transition-colors duration-150 hover:bg-secondary/50;
   }
 
-  .align-right {
-    @apply text-right !important;
-    text-align: right !important;
-  }
-
-  .align-center {
-    @apply text-center !important;
-    text-align: center !important;
-  }
-
-  .align-left {
-    @apply text-left !important;
-    text-align: left !important;
-  }
-
-  .cell-actions {
-    @apply flex items-center justify-center gap-1;
-  }
-
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg;
   }
+
+
 
   /* Skeleton Loader - similar to LinkedIn */
   .skeleton {
