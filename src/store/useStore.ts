@@ -205,7 +205,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   updateRoleInSupabase: async (role) => {
     const { supabaseUser, user } = get();
     if (!supabaseUser) return;
-    // Update existing role or insert if missing
+    // Update existing role or insert if missing, and mark as confirmed by user
     const { data: existing } = await supabase
       .from('user_roles')
       .select('id')
@@ -214,12 +214,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (existing) {
       await supabase
         .from('user_roles')
-        .update({ role })
+        .update({ role, confirmed_by_user: true })
         .eq('user_id', supabaseUser.id);
     } else {
       await supabase
         .from('user_roles')
-        .insert({ user_id: supabaseUser.id, role });
+        .insert({ user_id: supabaseUser.id, role, confirmed_by_user: true });
     }
     if (user) set({ user: { ...user, role }, needsRoleSelection: false });
   },
@@ -245,6 +245,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // If email confirmation is disabled, user will have an active session
     // If enabled, user will need to confirm email
     if (data.session) {
+      // Save role immediately with confirmed_by_user = true since user selected it
+      await supabase
+        .from('user_roles')
+        .insert({ user_id: data.user!.id, role, confirmed_by_user: true })
+        .single();
+      
       await get().setSession(data.session);
     }
     
