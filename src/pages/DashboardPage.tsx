@@ -9,12 +9,14 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
-  const { vehicles, trips, maintenanceLogs, drivers } = useFleetStore();
+  const { vehicles, trips, maintenanceLogs, drivers, expenses } = useFleetStore();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [regionFilter, setRegionFilter] = useState('all');
   const navigate = useNavigate();
 
-  const activeFleet = vehicles.filter((v) => v.status !== 'Retired').length;
+  const activeFleetCount = vehicles.filter((v) => v.status === 'On Trip').length;
   const maintenanceAlerts = vehicles.filter((v) => v.status === 'In Shop').length;
   const onTrip = vehicles.filter((v) => v.status === 'On Trip').length;
   const utilization = vehicles.length ? Math.round((onTrip / vehicles.length) * 100) : 0;
@@ -54,7 +56,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           title="Active Fleet"
-          value={activeFleet}
+          value={activeFleetCount}
           icon={<Truck className="h-5 w-5" />}
           trend={`${onTrip} on trip`}
           delay={0}
@@ -125,6 +127,29 @@ export default function DashboardPage() {
               { label: 'Dispatched', value: 'Dispatched' },
               { label: 'Completed', value: 'Completed' },
               { label: 'Cancelled', value: 'Cancelled' },
+            ],
+          },
+          {
+            label: 'Type',
+            value: typeFilter,
+            onChange: setTypeFilter,
+            options: [
+              { label: 'All Types', value: 'all' },
+              { label: 'Truck', value: 'Truck' },
+              { label: 'Van', value: 'Van' },
+              { label: 'Bike', value: 'Bike' },
+            ],
+          },
+          {
+            label: 'Region',
+            value: regionFilter,
+            onChange: setRegionFilter,
+            options: [
+              { label: 'All Regions', value: 'all' },
+              { label: 'North', value: 'North' },
+              { label: 'South', value: 'South' },
+              { label: 'East', value: 'East' },
+              { label: 'West', value: 'West' },
             ],
           },
         ]}
