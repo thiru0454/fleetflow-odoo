@@ -26,11 +26,11 @@ export default function AuthPage() {
   const [role, setRole] = useState<UserRole>('fleet_manager');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { login, register, loginWithGoogle, isAuthenticated } = useAuthStore();
+  const { login, register, loginWithGoogle, isAuthenticated, loading } = useAuthStore();
   const { toast } = useToast();
 
   // If already authenticated, redirect
-  if (isAuthenticated) {
+  if (isAuthenticated && !loading) {
     navigate('/dashboard', { replace: true });
     return null;
   }
@@ -51,24 +51,26 @@ export default function AuthPage() {
         const { error } = await login(email, password, role);
         if (error) {
           toast({ title: 'Login failed', description: error, variant: 'destructive' });
+          setSubmitting(false);
           return;
         }
+        toast({ title: '✓ Welcome to FleetFlow!' });
       } else {
         const { error } = await register(name, email, password, role);
         if (error) {
           toast({ title: 'Registration failed', description: error, variant: 'destructive' });
+          setSubmitting(false);
           return;
         }
-        toast({ title: 'Account created!', description: 'Confirm your email to get started.' });
-        setMode('login');
+        toast({ title: '✓ Account created!', description: 'Welcome to FleetFlow' });
+        // Clear form for next registration or login
         setEmail('');
         setPassword('');
         setName('');
         setConfirmPassword('');
+        // Don't switch mode - let auth redirect handle it since user may be auto-logged in
         return;
       }
-      toast({ title: '✓ Welcome to FleetFlow!', description: 'Redirecting to your dashboard...' });
-      navigate('/dashboard');
     } finally {
       setSubmitting(false);
     }

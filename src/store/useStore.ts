@@ -71,7 +71,7 @@ interface AuthState {
   supabaseUser: User | null;
   loading: boolean;
   needsRoleSelection: boolean;
-  setSession: (session: Session | null) => void;
+  setSession: (session: Session | null, event?: string) => void;
   setNeedsRoleSelection: (needs: boolean) => void;
   setRole: (role: UserRole) => void;
   updateRoleInSupabase: (role: UserRole) => Promise<void>;
@@ -137,11 +137,18 @@ const sampleExpenses: Expense[] = [
 async function fetchUserRole(userId: string): Promise<{ role: UserRole; isNew: boolean }> {
   const { data } = await supabase
     .from('user_roles')
-    .select('role')
+    .select('role, confirmed_by_user')
     .eq('user_id', userId)
     .single();
-  // If no role found, user is brand new (trigger may not have fired yet for OAuth)
+  
+  // If no role found, user is brand new
   if (!data) return { role: 'fleet_manager', isNew: true };
+  
+  // If role exists but NOT confirmed by user, it's an auto-created role (OAuth default) - force selection
+  if (data.confirmed_by_user === false || data.confirmed_by_user === null) {
+    return { role: data.role as UserRole, isNew: true };
+  }
+  
   return { role: data.role as UserRole, isNew: false };
 }
 
@@ -153,16 +160,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: true,
   needsRoleSelection: false,
 
-  setSession: async (session) => {
+  setSession: async (session, event) => {
     if (session?.user) {
       const { role, isNew } = await fetchUserRole(session.user.id);
       const meta = session.user.user_metadata;
       const isOAuth = session.user.app_metadata?.provider === 'google';
+      
+      // For OAuth users, force role selection if newly signed up
+      const forceRoleSelection = isOAuth && isNew;
+      
       set({
         isAuthenticated: true,
         session,
         supabaseUser: session.user,
-        needsRoleSelection: isOAuth && isNew,
+        needsRoleSelection: forceRoleSelection,
         user: {
           name: meta?.name || meta?.full_name || session.user.email?.split('@')[0] || 'User',
           email: session.user.email || '',
@@ -230,6 +241,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     });
     if (error) return { error: error.message };
+    
+    // If email confirmation is disabled, user will have an active session
+    // If enabled, user will need to confirm email
+    if (data.session) {
+      await get().setSession(data.session);
+    }
+    
     return { error: null };
   },
 
@@ -248,12 +266,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: () => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      get().setSession(session);
+    // Set up auth state listener FIRST - pass event type to setSession
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      get().setSession(session, event);
     });
 
-    // Then check existing session
+    // Then check existing session (on page refresh/load)
     supabase.auth.getSession().then(({ data: { session } }) => {
       get().setSession(session);
     });
