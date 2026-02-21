@@ -47,13 +47,13 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in">
         <div>
-          <h2 className="text-2xl font-bold">Trip & Expense</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Trip & Expense</h2>
           <p className="text-sm text-muted-foreground">Financial tracking and fuel logging</p>
         </div>
-        <Button onClick={() => { setForm({ tripId: '', driverId: '', fuelCost: 0, fuelLiters: 0, miscExpense: 0, date: new Date().toISOString().split('T')[0] }); setModalOpen(true); }} className="bg-primary text-primary-foreground hover:bg-primary/90">
-          <Plus className="h-4 w-4 mr-2" /> Add Expense
+        <Button onClick={() => { setForm({ tripId: '', driverId: '', fuelCost: 0, fuelLiters: 0, miscExpense: 0, date: new Date().toISOString().split('T')[0] }); setModalOpen(true); }} className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/50 hover:scale-105 group">
+          <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" /> Add Expense
         </Button>
       </div>
 

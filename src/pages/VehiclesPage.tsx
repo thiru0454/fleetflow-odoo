@@ -63,13 +63,13 @@ export default function VehiclesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in">
         <div>
-          <h2 className="text-2xl font-bold">Vehicle Registry</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Vehicle Registry</h2>
           <p className="text-sm text-muted-foreground">Manage your fleet assets</p>
         </div>
-        <Button onClick={openCreate} className="bg-primary text-primary-foreground hover:bg-primary/90">
-          <Plus className="h-4 w-4 mr-2" /> Add Vehicle
+        <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/50 hover:scale-105 shadow-md transition-all duration-300 group">
+          <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" /> Add Vehicle
         </Button>
       </div>
 
@@ -83,7 +83,7 @@ export default function VehiclesPage() {
         }]}
       />
 
-      <div className="glass-card overflow-hidden">
+      <div className="glass-card overflow-hidden hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 animate-fade-in" style={{ animationDelay: '100ms' }}>
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
@@ -99,19 +99,19 @@ export default function VehiclesPage() {
             </thead>
             <tbody>
               {filtered.map((v, i) => (
-                <tr key={v.id} className="opacity-0 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
-                  <td className="font-medium">{v.licensePlate}</td>
-                  <td>{v.model}</td>
-                  <td className="text-muted-foreground">{v.type}</td>
-                  <td>{v.capacity.toLocaleString()}</td>
-                  <td className="text-muted-foreground">{v.odometer.toLocaleString()} km</td>
+                <tr key={v.id} className="opacity-0 animate-fade-in hover:bg-primary/10 hover:scale-y-105 transition-all duration-200 group" style={{ animationDelay: `${i * 50}ms` }}>
+                  <td className="font-medium group-hover:text-primary transition-colors">{v.licensePlate}</td>
+                  <td className="group-hover:text-primary transition-colors">{v.model}</td>
+                  <td className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">{v.type}</td>
+                  <td className="group-hover:text-primary transition-colors">{v.capacity.toLocaleString()}</td>
+                  <td className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">{v.odometer.toLocaleString()} km</td>
                   <td><StatusBadge status={v.status} /></td>
                   <td>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(v)} className="text-muted-foreground hover:text-foreground h-8 w-8">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(v)} className="text-muted-foreground hover:text-foreground hover:bg-primary/20 hover:scale-110 h-8 w-8 transition-all duration-200">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => { deleteVehicle(v.id); toast({ title: 'Vehicle deleted' }); }} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                      <Button variant="ghost" size="icon" onClick={() => { deleteVehicle(v.id); toast({ title: 'Vehicle deleted' }); }} className="text-muted-foreground hover:text-destructive hover:bg-destructive/20 hover:scale-110 h-8 w-8 transition-all duration-200">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -157,10 +157,10 @@ export default function VehiclesPage() {
             </Select>
           </div>
           <div className="flex gap-3 pt-2">
-            <Button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button onClick={handleSave} className="flex-1 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/50 hover:scale-105 shadow-md transition-all duration-300">
               {editing ? 'Update' : 'Create'} Vehicle
             </Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)} className="border-border">Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)} className="border-primary/30 hover:border-primary hover:bg-primary/10 transition-all">Cancel</Button>
           </div>
         </div>
       </ModalForm>

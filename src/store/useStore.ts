@@ -97,6 +97,7 @@ interface FleetState {
   addExpense: (e: Omit<Expense, 'id'>) => void;
   addDriver: (d: Omit<Driver, 'id'>) => void;
   updateDriver: (id: string, d: Partial<Driver>) => void;
+  isLicenseExpired: (date: string) => boolean;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -231,7 +232,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/dashboard',
+        redirectTo: window.location.origin,
       },
     });
   },
@@ -256,7 +257,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
-export const useFleetStore = create<FleetState>((set) => ({
+export const useFleetStore = create<FleetState>((set, get) => ({
   vehicles: sampleVehicles,
   drivers: sampleDrivers,
   trips: sampleTrips,
@@ -266,7 +267,48 @@ export const useFleetStore = create<FleetState>((set) => ({
   updateVehicle: (id, v) => set((s) => ({ vehicles: s.vehicles.map((x) => x.id === id ? { ...x, ...v } : x) })),
   deleteVehicle: (id) => set((s) => ({ vehicles: s.vehicles.filter((x) => x.id !== id) })),
   addTrip: (t) => set((s) => ({ trips: [...s.trips, { ...t, id: `TR-${String(s.trips.length + 1).padStart(3, '0')}` }] })),
-  updateTrip: (id, t) => set((s) => ({ trips: s.trips.map((x) => x.id === id ? { ...x, ...t } : x) })),
+  updateTrip: (id, t) => set((s) => {
+    const trip = s.trips.find(x => x.id === id);
+    if (!trip) return { trips: s.trips };
+    
+    const updatedTrip = { ...trip, ...t };
+    let updatedVehicles = s.vehicles;
+    let updatedDrivers = s.drivers;
+
+    // Auto-logic: When trip status changes to "Dispatched"
+    if (t.status === 'Dispatched' && trip.status !== 'Dispatched') {
+      updatedVehicles = s.vehicles.map((v) =>
+        v.id === trip.vehicleId ? { ...v, status: 'On Trip' as VehicleStatus } : v
+      );
+      updatedDrivers = s.drivers.map((d) =>
+        d.id === trip.driverId ? { ...d, status: 'On Trip' as DriverStatus } : d
+      );
+    }
+    // Auto-logic: When trip status changes to "Completed"
+    else if (t.status === 'Completed' && trip.status !== 'Completed') {
+      updatedVehicles = s.vehicles.map((v) =>
+        v.id === trip.vehicleId ? { ...v, status: 'Available' as VehicleStatus } : v
+      );
+      updatedDrivers = s.drivers.map((d) =>
+        d.id === trip.driverId ? { ...d, status: 'On Duty' as DriverStatus } : d
+      );
+    }
+    // Auto-logic: When trip is cancelled, reset statuses if they were "On Trip"
+    else if (t.status === 'Cancelled' && (trip.status === 'Draft' || trip.status === 'Dispatched')) {
+      updatedVehicles = s.vehicles.map((v) =>
+        v.id === trip.vehicleId && v.status === 'On Trip' ? { ...v, status: 'Available' as VehicleStatus } : v
+      );
+      updatedDrivers = s.drivers.map((d) =>
+        d.id === trip.driverId && d.status === 'On Duty' ? { ...d, status: 'On Duty' as DriverStatus } : d
+      );
+    }
+
+    return {
+      trips: s.trips.map((x) => x.id === id ? updatedTrip : x),
+      vehicles: updatedVehicles,
+      drivers: updatedDrivers,
+    };
+  }),
   addMaintenanceLog: (m) => set((s) => {
     const newLog = { ...m, id: `ML-${String(s.maintenanceLogs.length + 1).padStart(3, '0')}` };
     return {
@@ -278,4 +320,5 @@ export const useFleetStore = create<FleetState>((set) => ({
   addExpense: (e) => set((s) => ({ expenses: [...s.expenses, { ...e, id: `EX-${String(s.expenses.length + 1).padStart(3, '0')}` }] })),
   addDriver: (d) => set((s) => ({ drivers: [...s.drivers, { ...d, id: uid() }] })),
   updateDriver: (id, d) => set((s) => ({ drivers: s.drivers.map((x) => x.id === id ? { ...x, ...d } : x) })),
+  isLicenseExpired: (date: string) => new Date(date) < new Date(),
 }));
